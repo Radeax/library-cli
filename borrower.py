@@ -14,7 +14,7 @@ def runBorrower():
 			cardNum = int(cardNum)
 			print("\nCard number:", cardNum)
 			if cardNum in borrowers:
-				print("\nWelcome {0}!".format(borrowers[cardNum]))
+				print("\nWelcome {0}!".format(borrowers[cardNum-1]))
 				bookOption(cardNum)
 			else:
 				print("\nCard number not found. Please try again.\n")
@@ -40,7 +40,7 @@ def bookOption(cardNum):
 
 #Used in both option 1 and 2
 def selectBranch(cardNum, checkout):
-	#IMPORTANT NOTE
+	#GET BRANCHES
 	libraries = getTableData("tbl_library_branch")
 
 	#numBranches + 1 will be our quit option
@@ -54,11 +54,9 @@ def selectBranch(cardNum, checkout):
 	else:
 		print("\nPick the branch you want to return book to:\n")
 	#Print out options
-	# for bId, location in libraries.items():
 	for j in range(0, len(libraries)):
-	#Allows for change in number of libraries
 		print(libraries[j])
-			# print("{0}) {1}, {2}".format(i, j[0], j[1]))
+
 	print("{0}) Quit to previous page\n".format(numBranches + 1))
 
 	#Take input from user and take appropriate action
@@ -79,10 +77,7 @@ def selectLibBook(branchId, branchName, branchLocation, cardNum):
 	bookInp = 0
 	numBooks = -2
 	while bookInp != numBooks + 1:
-		#**THIS WILL NEED A SQL QUERY TO POPULATE**
-		#Will be based on library branch id
-		# books = {1: ["The Lost Tribe", "Sidney Sheldon", 5], 2: ["The Haunting", "Stephen King", 3],
-		# 		3: ["Microtrends", "Sidney Sheldon", 10], 4: ["Test Book", "John Jackson", 0]}
+		# GET BOOK DATA
 		books = getTableData("tbl_book")
 		numBooks = len(books)
 
@@ -91,6 +86,8 @@ def selectLibBook(branchId, branchName, branchLocation, cardNum):
 		for bId, bInfo in books.items():
 			#Allows for change in number of books
 			print("{0}) {1} copies of {2} by {3}".format(bId, books[bId][2], bInfo[0], bInfo[1]))
+		for j in range(0, len(libraries)):
+			print(libraries[j])
 		print("{0}) Quit to previous page\n".format(numBooks + 1))
 
 		#Take input from user and take appropriate action
