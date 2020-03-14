@@ -2,170 +2,204 @@ import check
 # import mysql.connector
 from librarysql import *
 
-#Takes card number
+# initialData()
+borrower = []
+borrowerIds = getIds("tbl_borrower")
+borrowers = getTableData("tbl_borrower")
+branches = getTableData("tbl_library_branch")
+branches = getTableData("tbl_library_branch")
+books = getTableData("tbl_book")
+authors = getTableData("tbl_author")
+book_authors = getTableData("tbl_book_authors")
+
+# Takes card number
+
+
 def runBorrower():
-	print("\nYour input was 3, You are a Borrower\n")
-	cardNum = -1
-	borrowers = getIds("tbl_borrower")
-	print(borrowers)
-	while cardNum not in borrowers:
-		cardNum = input("Enter your card number:\n")
-		if validCardNum(cardNum):
-			cardNum = int(cardNum)
-			print("\nCard number:", cardNum)
-			if cardNum in borrowers:
-				print("\nWelcome {0}!".format(borrowers[cardNum-1]))
-				bookOption(cardNum)
-			else:
-				print("\nCard number not found. Please try again.\n")
+    cardNum = -1
+    print("\nYour input was 3, You are a Borrower\n")
+    print(borrowers)
+    while cardNum not in borrowerIds:
+        cardNum = input("Enter your card number:\n")
+        if validCardNum(cardNum):
+            cardNum = int(cardNum)
+            print("\nCard number:", cardNum)
+            if cardNum in borrowerIds:
+                borrower = borrowers[cardNum-1]
+                print(f"\nWelcome, {borrower[1]}!")
+                bookOption(cardNum)
+            else:
+                print("\nCard number not found. Please try again.\n")
 
-#Borr 1, Check out book or return book
+# Borr 1, Check out book or return book
+
+
 def bookOption(cardNum):
-	inp = 0
-	while inp != 3:
-		print("\nWhat would you like to do?")
-		print("\n1) Check out a book\n2) Return a book\n3) Quit to main menu\n")
-		inp = input("Please enter a number between 1 and 3: ")
-		if check.validInput(inp, 1, 3):
-			inp = int(inp)
-			print("\nYou selected", inp)
-			#Check out
-			if inp == 1:
-				selectBranch(cardNum, True)
-			#Return book
-			elif inp == 2:
-				selectBranch(cardNum, False)
-			elif inp == 3:
-				print("\nMoving to main menu...")
+    inp = 0
+    while inp != 3:
+        print("\nWhat would you like to do?")
+        print("\n1) Check out a book\n2) Return a book\n3) Quit to main menu\n")
+        inp = input("Please enter a number between 1 and 3: ")
+        if check.validInput(inp, 1, 3):
+            inp = int(inp)
+            print("\nYou selected", inp)
+            # Check out
+            if inp == 1:
+                selectBranch(cardNum, True)
+            # Return book
+            elif inp == 2:
+                selectBranch(cardNum, False)
+            elif inp == 3:
+                print("\nMoving to main menu...")
 
-#Used in both option 1 and 2
+# Used in both option 1 and 2
+
+
 def selectBranch(cardNum, checkout):
-	#GET BRANCHES
-	libraries = getTableData("tbl_library_branch")
+    # numBranches + 1 will be our quit option
+    numBranches = len(branches)
+    branchID = 0
 
-	#numBranches + 1 will be our quit option
-	numBranches = len(libraries)
-	#This input will be for the library selection
-	libInp = 0
-	#If checking out a book
-	if checkout:
-		print("\nPick the branch you want to check out from:\n")
-	#If returning a book
-	else:
-		print("\nPick the branch you want to return book to:\n")
-	#Print out options
-	for j in range(0, len(libraries)):
-		print(libraries[j])
+    # If checking out a book
+    if checkout:
+        print("\nPick the branch you want to check out from:\n")
+    # If returning a book
+    else:
+        print("\nPick the branch you want to return book to:\n")
 
-	print("{0}) Quit to previous page\n".format(numBranches + 1))
+    i = 1
+    for branch in branches:
+        branchName = branch[1]
+        branchLoc = branch[2]
+        print(f"{i}) {branchName}, {branchLoc}")
+        i += 1
 
-	#Take input from user and take appropriate action
-	libInp = input("Please enter a number between 1 and {0}: ".format(numBranches + 1))
-	if check.validInput(libInp, 1, numBranches + 1):
-		libInp = int(libInp)
-		if libInp == (numBranches + 1):
-			#Quit to Borr1
-			print("\nMoving to previous page...")
-		elif checkout:
-			#Move to book menu
-			selectLibBook(libInp, libraries[libInp][0], libraries[libInp][1], cardNum)
-		else:
-			selectBorBook(libInp, libraries[libInp][0], libraries[libInp][1], cardNum)
+    print(f"{numBranches + 1}) Quit to previous page\n")
 
-#Option 1 p2, Select a book to check out then update the database
-def selectLibBook(branchId, branchName, branchLocation, cardNum):	
-	bookInp = 0
-	numBooks = -2
-	while bookInp != numBooks + 1:
-		# GET BOOK DATA
-		books = getTableData("tbl_book")
-		numBooks = len(books)
+    # Take input from user and take appropriate action
+    branchID = input(f"Please enter a number between 1 and {numBranches+1}: ")
 
-		print("\nHere are the books at {0} in {1}.".format(branchName, branchLocation))
-		print("\nPlease select a book to check out:\n")
-		for bId, bInfo in books.items():
-			#Allows for change in number of books
-			print("{0}) {1} copies of {2} by {3}".format(bId, books[bId][2], bInfo[0], bInfo[1]))
-		for j in range(0, len(libraries)):
-			print(libraries[j])
-		print("{0}) Quit to previous page\n".format(numBooks + 1))
+    if check.validInput(branchID, 1, numBranches + 1):
+        branchID = int(branchID)
+        if branchID == (numBranches + 1):
+            # Quit to Borr1
+            print("\nMoving to previous page...")
+        elif checkout:
+            # Move to book menu
+            selectLibBook(branchID, cardNum)
+        else:
+            selectBorBook(branchID, branches[branchID]
+                          [0], branches[branchID][1], cardNum)
 
-		#Take input from user and take appropriate action
-		bookInp = input("Please enter a number between 1 and {0}: ".format(numBooks + 1))
-		if check.validInput(bookInp, 1, numBooks + 1):
-			bookInp = int(bookInp)
-			#If quit not selected
-			if bookInp != (numBooks + 1):
-				myBook = books[bookInp]
-				print("\nYou picked {0}".format(myBook[0]))
-				#CHECK FOR 0 COPIES
-				if myBook[2] == 0:
-					print("\nSorry we have no more copies of", myBook[0])
-				else:
-					print("\nYou are checking out 1 copy of", myBook[0])
-					#***Needs to subtract 1 from no_book_copies in the database***
-					#Include in book loans the date out (curdate), and due date (add a week)
-					'''
-						ADD SQL CODE HERE
-					'''
+# Option 1 p2, Select a book to check out then update the database
 
-					#This is merely cosmetic, will get actual value from DB
-					print("\nNew number of copies: {0}".format(myBook[2] - 1))
-			else:
-				print("\nMoving to previous page...")
 
-#Option 2, Borrow a book
+def selectLibBook(branchId, cardNum):
+    branchName = branches[branchId-1][1]
+    branchLoc = branches[branchId-1][2]
+
+    bookInp = 0
+    numBooks = -2
+
+    while bookInp != numBooks + 1:
+        # GET BOOK DATA
+        bookCopies = getTableData("tbl_book_copies")
+        numBooks = len(bookCopies)
+
+        print(f"\nHere are the books at {branchName} in {branchLoc}.")
+
+        print("\nPlease select a book to check out:\n")
+        listNo = 0
+        i = 1
+        for bookCopy in bookCopies:
+            if bookCopy[1] == branchId and getNumCopy(bookCopy[0], branchId) > 0:
+                bookID = bookCopy[0]
+                title = books[bookID-1][1]
+                author = getAuthorName(getAuthorID(bookID))
+                copiesLeft = getNumCopy(bookID, branchId)
+                listNo = listNo + 1
+                print(f"{listNo}) {title} by {author} | Available: {copiesLeft}")
+            i += 1
+
+        print("{0}) Quit to previous page\n".format(numBooks + 1))
+
+        # Take input from user and take appropriate action
+        bookChoice = input(
+            f"Please enter a number between 1 and {numBooks + 1}: ")
+        if check.validInput(bookChoice, 1, numBooks + 1):
+            bookChoice = int(bookChoice)
+            # If quit not selected
+            if bookChoice != (numBooks + 1):
+                myBook = bookCopies[bookChoice-1]
+                myBookID = myBook[0]
+                print(f"\nYou picked {getBookTitle(myBookID)}")
+
+                checkout(myBookID, branchId, cardNum)
+                # This is merely cosmetic, will get actual value from DB
+                print(f"\nCopies remaining: {getNumCopy(myBookID, branchId)}")
+            else:
+                print("\nMoving to previous page...")
+
+# Option 2, Borrow a book
+
+
 def selectBorBook(branchId, branchName, branchLocation, cardNum):
-	#**THIS WILL NEED A SQL QUERY TO POPULATE**
-	#Will be based on library branch id
-	loans = {123:[[1, "The Lost Tribe", "3-10-20", "4-1-20"]], 234:[[1, "The Lost Tribe", "3-15-20", "4-6-20"],
-	 [2, "The Haunting", "3-5-20", "3-27-20"]], 345:[]} 
+    # **THIS WILL NEED A SQL QUERY TO POPULATE**
+    # Will be based on library branch id
+    loans = {123: [[1, "The Lost Tribe", "3-10-20", "4-1-20"]], 234: [[1, "The Lost Tribe", "3-15-20", "4-6-20"],
+                                                                      [2, "The Haunting", "3-5-20", "3-27-20"]], 345: []}
 
-	numLoans = len(loans[cardNum])
-	print("NumLoans =", numLoans)
+    numLoans = len(loans[cardNum])
+    print("NumLoans =", numLoans)
 
-	if numLoans == 0:
-		print("\nYou do not have any outstanding book loans.\n")
-	else:
-		books = loans[cardNum]
+    if numLoans == 0:
+        print("\nYou do not have any outstanding book loans.\n")
+    else:
+        books = loans[cardNum]
 
-		print("\nHere are the books owned by borrower #{0}.".format(cardNum))
-		print("\nPlease select a book to return:\n")
-		for i in range(0, numLoans):
-			#Allows for change in number of books
-			print("{0}) {1} (Due on {2})".format(i + 1, books[i][1], books[i][3]))
-		print("{0}) Quit to previous page\n".format(numLoans + 1))
+        print("\nHere are the books owned by borrower #{0}.".format(cardNum))
+        print("\nPlease select a book to return:\n")
+        for i in range(0, numLoans):
+            # Allows for change in number of books
+            print("{0}) {1} (Due on {2})".format(
+                i + 1, books[i][1], books[i][3]))
+        print("{0}) Quit to previous page\n".format(numLoans + 1))
 
-		bookInp = 0
-		#Take input from user and take appropriate action
-		bookInp = input("Please enter a number between 1 and {0}: ".format(numLoans + 1))
-		if check.validInput(bookInp, 1, numLoans + 1):
-			bookInp = int(bookInp)
-			#If quit not selected
-			if bookInp != (numLoans + 1):
-				myBook = books[bookInp - 1]
-				print("\nYou picked {0} with id: {1}".format(myBook[1], myBook[0]))
-				print("\nYou are returning 1 copy of {0} to {1}.".format(myBook[1], branchName))
-				#***Needs to add 1 from no_book_copies in the database***
-				#Also needs to remove the book from book loans
-				'''
+        bookInp = 0
+        # Take input from user and take appropriate action
+        bookInp = input(
+            "Please enter a number between 1 and {0}: ".format(numLoans + 1))
+        if check.validInput(bookInp, 1, numLoans + 1):
+            bookInp = int(bookInp)
+            # If quit not selected
+            if bookInp != (numLoans + 1):
+                myBook = books[bookInp - 1]
+                print("\nYou picked {0} with id: {1}".format(
+                    myBook[1], myBook[0]))
+                print("\nYou are returning 1 copy of {0} to {1}.".format(
+                    myBook[1], branchName))
+                # ***Needs to add 1 from no_book_copies in the database***
+                # Also needs to remove the book from book loans
+                '''
 					ADD SQL CODE HERE
 				'''
-			
-	print("\nMoving to previous page...")
+
+    print("\nMoving to previous page...")
+
 
 def validCardNum(inp):
-	try:
-		int(inp)
-	except ValueError:
-		print("\n-------------------------\nInvalid input. Try Again\n-------------------------\n")
-		print("\nWrong data type, please use an integer.\n")
-		return False
-	else:
-		#Check if in range
-		if int(inp) < 0:
-			print("\n-------------------------\nInvalid input. Try Again\n-------------------------\n")
-			print("\nYour input should be a positive number.\n")
-			return False
-		else:
-			return True
+    try:
+        int(inp)
+    except ValueError:
+        print("\n-------------------------\nInvalid input. Try Again\n-------------------------\n")
+        print("\nWrong data type, please use an integer.\n")
+        return False
+    else:
+        # Check if in range
+        if int(inp) < 0:
+            print(
+                "\n-------------------------\nInvalid input. Try Again\n-------------------------\n")
+            print("\nYour input should be a positive number.\n")
+            return False
+        else:
+            return True
