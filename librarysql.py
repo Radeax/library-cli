@@ -19,8 +19,16 @@ def alter(state, msg):
 
 
 def checkout(bookId, branchId, cardNo):
+    addBookLoan(bookId, branchId, cardNo)
+    removeBookCopy(bookId, branchId)
+
+
+def addBookLoan(bookId, branchId, cardNo):
     mycursor.execute(
         f"INSERT INTO tbl_book_loans (bookId, branchId, cardNo, dateOut, dueDate) VALUES ({bookId}, {branchId}, {cardNo}, CURDATE(), DATE(CURDATE() + 7))")
+
+
+def removeBookCopy(bookId, branchId):
     mycursor.execute(
         f"UPDATE tbl_book_copies SET noOfCopies = noOfCopies - 1 WHERE bookId = {bookId} AND branchId = {branchId}")
 
