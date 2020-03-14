@@ -6,13 +6,7 @@ from librarysql import *
 borrower = []
 borrowerIds = getIds("tbl_borrower")
 borrowers = getTableData("tbl_borrower")
-branches = getTableData("tbl_library_branch")
-branches = getTableData("tbl_library_branch")
-books = getTableData("tbl_book")
-authors = getTableData("tbl_author")
-book_authors = getTableData("tbl_book_authors")
-
-# Takes card number
+branches = getAllBranches()
 
 
 def runBorrower():
@@ -34,15 +28,16 @@ def runBorrower():
             else:
                 print("\nCard number not found. Please try again.\n")
 
-# Borr 1, Check out book or return book
-
 
 def bookOption(cardNum):
     inp = 0
     while inp != 3:
+        # Display User Options
         print("\nWhat would you like to do?")
         print("\n1) Check out a book\n2) Return a book\n3) Quit to main menu\n")
         inp = input("Please enter a number between 1 and 3: ")
+
+        # Take User Input
         if check.validInput(inp, 1, 3):
             inp = int(inp)
             print("\nYou selected", inp)
@@ -54,8 +49,6 @@ def bookOption(cardNum):
                 selectBranch(cardNum, False)
             elif inp == 3:
                 print("\nMoving to main menu...")
-
-# Used in both option 1 and 2
 
 
 def selectBranch(cardNum, checkout):
@@ -93,8 +86,6 @@ def selectBranch(cardNum, checkout):
         else:
             selectBorBook(branchID, cardNum)
 
-# Option 1 p2, Select a book to check out then update the database
-
 
 def selectLibBook(branchId, cardNum):
     branchName = branches[branchId-1][1]
@@ -104,8 +95,6 @@ def selectLibBook(branchId, cardNum):
     numBooks = -2
 
     while bookInp != numBooks + 1:
-        # GET BOOK DATA
-        # bookCopies = getTableData("tbl_book_copies")
         bookCopies = getAvailBooks(branchId)
         numBooks = len(bookCopies)
 
@@ -117,14 +106,14 @@ def selectLibBook(branchId, cardNum):
         for bookCopy in bookCopies:
             if bookCopy[1] == branchId:
                 bookID = bookCopy[0]
-                title = books[bookID-1][1]
+                title = getBookTitle(bookID)
                 author = getAuthorName(getAuthorID(bookID))
                 copiesLeft = getNumCopy(bookID, branchId)
                 listNo = listNo + 1
                 print(f"{listNo}) {title} by {author} | Available: {copiesLeft}")
             i += 1
 
-        print("{0}) Quit to borrower menu\n".format(numBooks + 1))
+        print(f"{numBooks + 1}) Quit to borrower menu\n")
 
         # Take input from user and take appropriate action
         bookChoice = input(
@@ -144,7 +133,6 @@ def selectLibBook(branchId, cardNum):
                     print(
                         f"\nYou are checking out 1 copy of {getBookTitle(myBookID)}")
                     checkout(myBookID, branchId, cardNum)
-                # This is merely cosmetic, will get actual value from DB
                 print(f"\nCopies remaining: {getNumCopy(myBookID, branchId)}")
             else:
                 print("\nMoving to previous page...")
@@ -154,10 +142,6 @@ def selectLibBook(branchId, cardNum):
 
 
 def selectBorBook(branchId, cardNum):
-    # **THIS WILL NEED A SQL QUERY TO POPULATE**
-    # Will be based on library branch id
-    # loans = {123: [[1, "The Lost Tribe", "3-10-20", "4-1-20"]], 234: [[1, "The Lost Tribe", "3-15-20", "4-6-20"],
-    #                                                                   [2, "The Haunting", "3-5-20", "3-27-20"]], 345: []}
     loans = getBorrowedBooks(branchId, cardNum)
     print(getBorrowedBooks(branchId, cardNum))
 
@@ -167,7 +151,7 @@ def selectBorBook(branchId, cardNum):
     if numLoans == 0:
         print("\nYou do not have any outstanding book loans.\n")
     else:
-        print("\nHere are the books owned by borrower #{0}.".format(cardNum))
+        print(f"\nHere are the books owned by borrower #{cardNum}.")
         print("\nPlease select a book to return:\n")
         for i in range(0, numLoans):
             # Allows for change in number of books
@@ -177,23 +161,20 @@ def selectBorBook(branchId, cardNum):
             author = getAuthorName(authorID)
             dueDate = getDueDate(bookID, branchId, cardNum)
             print(f"{i+1}) {title} by {author} (Due on {dueDate}")
-            # print("{0}) {1} (Due on {2})".format(
-            #     i + 1, books[i][1], books[i][3]))
-        print("{0}) Quit to previous page\n".format(numLoans + 1))
+        print(f"{numLoans + 1}) Quit to previous page\n")
 
         bookInp = 0
         # Take input from user and take appropriate action
         bookInp = input(
-            "Please enter a number between 1 and {0}: ".format(numLoans + 1))
+            f"Please enter a number between 1 and {numLoans + 1}: ")
         if check.validInput(bookInp, 1, numLoans + 1):
             bookInp = int(bookInp)
             # If quit not selected
             if bookInp != (numLoans + 1):
                 myBook = loans[bookInp - 1]
-                print("\nYou picked {0} with id: {1}".format(
-                    myBook[1], myBook[0]))
-                print(f"\nYou are returning 1 copy of {0} to {1}.".format(
-                    myBook[1], getBranchName(branchId)))
+                print(f"\nYou picked {myBook[1]} with id: {myBook[0]}")
+                print(
+                    f"\nYou are returning 1 copy of {myBook[1]} to {getBranchName(branchId)}.")
                 myBookID = myBook[0]
                 processReturn(myBookID, branchId, cardNum)
 
