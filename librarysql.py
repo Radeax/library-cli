@@ -23,14 +23,42 @@ def checkout(bookId, branchId, cardNo):
     removeBookCopy(bookId, branchId)
 
 
+def addBookCopy(bookId, branchId):
+    mycursor.execute(
+        f"UPDATE tbl_book_copies SET noOfCopies = noOfCopies + 1 WHERE bookId = {bookId} AND branchId = {branchId}")
+    mydb.commit()
+
+
+def removeBookLoan(bookId, branchId, cardNo):
+    mycursor.execute(
+        f"DELETE FROM tbl_book_loans WHERE bookId = {bookId} AND branchId = {branchId} AND cardNo = {cardNo}")
+    mydb.commit()
+
+
+def processReturn(bookId, branchId, cardNo):
+    addBookCopy(bookId, branchId)
+    removeBookLoan(bookId, branchId, cardNo)
+
+
 def addBookLoan(bookId, branchId, cardNo):
     mycursor.execute(
         f"INSERT INTO tbl_book_loans (bookId, branchId, cardNo, dateOut, dueDate) VALUES ({bookId}, {branchId}, {cardNo}, CURDATE(), DATE(CURDATE() + 7))")
+    mydb.commit()
 
 
 def removeBookCopy(bookId, branchId):
     mycursor.execute(
         f"UPDATE tbl_book_copies SET noOfCopies = noOfCopies - 1 WHERE bookId = {bookId} AND branchId = {branchId}")
+    mydb.commit()
+
+
+def checkedOut(bookId, branchId, cardNo):
+    mycursor.execute(
+        f"SELECT * FROM tbl_book_loans WHERE bookId = {bookId} AND branchId = {branchId} AND cardNo = {cardNo}")
+    if len(mycursor.fetchall()) > 0:
+        return True
+    else:
+        return False
 
 
 def getTableData(tableName):
@@ -50,9 +78,33 @@ def getAuthorID(bookId):
     return mycursor.fetchall()[0][0]
 
 
+def getAvailBooks(branchId):
+    mycursor.execute(
+        f"SELECT * FROM tbl_book_copies WHERE branchId = {branchId} AND noOfCopies > 0")
+    return mycursor.fetchall()
+
+
 def getBookTitle(bookId):
     mycursor.execute(
         f"SELECT title FROM tbl_book WHERE bookId = {bookId}")
+    return mycursor.fetchall()[0][0]
+
+
+def getBorrowedBooks(branchId, cardNo):
+    mycursor.execute(
+        f"SELECT bookId, dueDate FROM tbl_book_loans WHERE branchId = {branchId} AND cardNo = {cardNo}")
+    return mycursor.fetchall()
+
+
+def getBranchName(branchId):
+    mycursor.execute(
+        f"SELECT branchName FROM tbl_library_branch WHERE branchId = {branchId}")
+    return mycursor.fetchall()[0][0]
+
+
+def getDueDate(bookId, branchId, cardNo):
+    mycursor.execute(
+        f"SELECT dueDate FROM tbl_book_loans WHERE bookId = {bookId} AND branchId = {branchId} AND cardNo = {cardNo}")
     return mycursor.fetchall()[0][0]
 
 
@@ -70,7 +122,7 @@ def getIds(tableName):
     if "genre" in tableName:
         mycursor.execute(f"SELECT genre_id FROM {tableName}")
     elif "publisher" in tableName:
-        mycursor.execute(f"SELECT SELECT publisherId FROM {tableName}")
+        mycursor.execute(f"SELECT publisherId FROM {tableName}")
     elif "book" in tableName:
         mycursor.execute(f"bookId FROM {tableName}")
     elif "author" in tableName:
