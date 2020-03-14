@@ -192,6 +192,11 @@ def initialData():
         alter("INSERT INTO tbl_book_copies (bookId, branchId, noOfCopies) VALUES (1, 1, 1)", "done")
         alter("INSERT INTO tbl_book_copies (bookId, branchId, noOfCopies) VALUES (2, 1, 2)", "done")
         alter("INSERT INTO tbl_book_copies (bookId, branchId, noOfCopies) VALUES (3, 1, 1)", "done")
+
+        # INSERT PUBLISHERS
+        alter("INSERT INTO tbl_publisher (publisherID, publisherName, publisherAddress, publisherPhone) VALUES (1, 'Book Guys', '123 Fake St, Indiana', '555-333-2222')", "done")
+        alter("INSERT INTO tbl_publisher (publisherID, publisherName, publisherAddress, publisherPhone) VALUES (2, 'Book Makers', '321 Some St, Iowa', '999-777-8888')", "done")
+        alter("INSERT INTO tbl_publisher (publisherID, publisherName, publisherAddress, publisherPhone) VALUES (3, 'We Make Books', '444 Totally Real St, Florida', '101-010-1010')", "done")
         mydb.commit()
     except Exception as e:
         mydb.rollback()
