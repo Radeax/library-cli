@@ -22,7 +22,7 @@ def runBorrower():
     print(borrowerIds)
     while cardNum not in borrowerIds:
         cardNum = input("Enter your card number:\n")
-        if validCardNum(cardNum):
+        if check.validCardNum(cardNum):
             cardNum = int(cardNum)
             print("\nCard number:", cardNum)
             if cardNum in borrowerIds:
