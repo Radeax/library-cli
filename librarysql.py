@@ -102,6 +102,12 @@ def getBranchName(branchId):
     return mycursor.fetchall()[0][0]
 
 
+def getAllBranches():
+    mycursor.execute(
+        f"SELECT * FROM tbl_library_branch")
+    return mycursor.fetchall()
+
+
 def getDueDate(bookId, branchId, cardNo):
     mycursor.execute(
         f"SELECT dueDate FROM tbl_book_loans WHERE bookId = {bookId} AND branchId = {branchId} AND cardNo = {cardNo}")
