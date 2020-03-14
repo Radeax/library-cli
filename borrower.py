@@ -2,7 +2,7 @@ import check
 # import mysql.connector
 from librarysql import *
 
-# initialData()
+initialData()  # Only run on a library database with no data
 borrower = []
 borrowerIds = getIds("tbl_borrower")
 borrowers = getTableData("tbl_borrower")
@@ -91,8 +91,7 @@ def selectBranch(cardNum, checkout):
             # Move to book menu
             selectLibBook(branchID, cardNum)
         else:
-            selectBorBook(branchID, branches[branchID]
-                          [0], branches[branchID][1], cardNum)
+            selectBorBook(branchID, cardNum)
 
 # Option 1 p2, Select a book to check out then update the database
 
@@ -106,7 +105,8 @@ def selectLibBook(branchId, cardNum):
 
     while bookInp != numBooks + 1:
         # GET BOOK DATA
-        bookCopies = getTableData("tbl_book_copies")
+        # bookCopies = getTableData("tbl_book_copies")
+        bookCopies = getAvailBooks(branchId)
         numBooks = len(bookCopies)
 
         print(f"\nHere are the books at {branchName} in {branchLoc}.")
@@ -115,7 +115,7 @@ def selectLibBook(branchId, cardNum):
         listNo = 0
         i = 1
         for bookCopy in bookCopies:
-            if bookCopy[1] == branchId and getNumCopy(bookCopy[0], branchId) > 0:
+            if bookCopy[1] == branchId:
                 bookID = bookCopy[0]
                 title = books[bookID-1][1]
                 author = getAuthorName(getAuthorID(bookID))
@@ -124,7 +124,7 @@ def selectLibBook(branchId, cardNum):
                 print(f"{listNo}) {title} by {author} | Available: {copiesLeft}")
             i += 1
 
-        print("{0}) Quit to previous page\n".format(numBooks + 1))
+        print("{0}) Quit to borrower menu\n".format(numBooks + 1))
 
         # Take input from user and take appropriate action
         bookChoice = input(
@@ -133,39 +133,52 @@ def selectLibBook(branchId, cardNum):
             bookChoice = int(bookChoice)
             # If quit not selected
             if bookChoice != (numBooks + 1):
+                print(numBooks)
                 myBook = bookCopies[bookChoice-1]
                 myBookID = myBook[0]
                 print(f"\nYou picked {getBookTitle(myBookID)}")
-
-                checkout(myBookID, branchId, cardNum)
+                if checkedOut(myBookID, branchId, cardNum):
+                    print(
+                        f"\nYou already have a copy of {getBookTitle(myBookID)} checked out.")
+                else:
+                    print(
+                        f"\nYou are checking out 1 copy of {getBookTitle(myBookID)}")
+                    checkout(myBookID, branchId, cardNum)
                 # This is merely cosmetic, will get actual value from DB
                 print(f"\nCopies remaining: {getNumCopy(myBookID, branchId)}")
             else:
                 print("\nMoving to previous page...")
+                break
 
-# Option 2, Borrow a book
+# Option 2, Return a book
 
 
-def selectBorBook(branchId, branchName, branchLocation, cardNum):
+def selectBorBook(branchId, cardNum):
     # **THIS WILL NEED A SQL QUERY TO POPULATE**
     # Will be based on library branch id
-    loans = {123: [[1, "The Lost Tribe", "3-10-20", "4-1-20"]], 234: [[1, "The Lost Tribe", "3-15-20", "4-6-20"],
-                                                                      [2, "The Haunting", "3-5-20", "3-27-20"]], 345: []}
+    # loans = {123: [[1, "The Lost Tribe", "3-10-20", "4-1-20"]], 234: [[1, "The Lost Tribe", "3-15-20", "4-6-20"],
+    #                                                                   [2, "The Haunting", "3-5-20", "3-27-20"]], 345: []}
+    loans = getBorrowedBooks(branchId, cardNum)
+    print(getBorrowedBooks(branchId, cardNum))
 
-    numLoans = len(loans[cardNum])
+    numLoans = len(loans)
     print("NumLoans =", numLoans)
 
     if numLoans == 0:
         print("\nYou do not have any outstanding book loans.\n")
     else:
-        books = loans[cardNum]
-
         print("\nHere are the books owned by borrower #{0}.".format(cardNum))
         print("\nPlease select a book to return:\n")
         for i in range(0, numLoans):
             # Allows for change in number of books
-            print("{0}) {1} (Due on {2})".format(
-                i + 1, books[i][1], books[i][3]))
+            bookID = loans[i][0]
+            title = getBookTitle(bookID)
+            authorID = getAuthorID(bookID)
+            author = getAuthorName(authorID)
+            dueDate = getDueDate(bookID, branchId, cardNum)
+            print(f"{i+1}) {title} by {author} (Due on {dueDate}")
+            # print("{0}) {1} (Due on {2})".format(
+            #     i + 1, books[i][1], books[i][3]))
         print("{0}) Quit to previous page\n".format(numLoans + 1))
 
         bookInp = 0
@@ -176,15 +189,12 @@ def selectBorBook(branchId, branchName, branchLocation, cardNum):
             bookInp = int(bookInp)
             # If quit not selected
             if bookInp != (numLoans + 1):
-                myBook = books[bookInp - 1]
+                myBook = loans[bookInp - 1]
                 print("\nYou picked {0} with id: {1}".format(
                     myBook[1], myBook[0]))
-                print("\nYou are returning 1 copy of {0} to {1}.".format(
-                    myBook[1], branchName))
-                # ***Needs to add 1 from no_book_copies in the database***
-                # Also needs to remove the book from book loans
-                '''
-					ADD SQL CODE HERE
-				'''
+                print(f"\nYou are returning 1 copy of {0} to {1}.".format(
+                    myBook[1], getBranchName(branchId)))
+                myBookID = myBook[0]
+                processReturn(myBookID, branchId, cardNum)
 
     print("\nMoving to previous page...")
