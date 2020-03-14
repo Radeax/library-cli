@@ -19,13 +19,16 @@ def runBorrower():
     cardNum = -1
     print("\nYour input was 3, You are a Borrower\n")
     print(borrowers)
+    print(borrowerIds)
     while cardNum not in borrowerIds:
         cardNum = input("Enter your card number:\n")
         if validCardNum(cardNum):
             cardNum = int(cardNum)
             print("\nCard number:", cardNum)
             if cardNum in borrowerIds:
-                borrower = borrowers[cardNum-1]
+                # Find row where cardNo is cardNum
+                i = borrowerIds.index(cardNum)
+                borrower = borrowers[i]
                 print(f"\nWelcome, {borrower[1]}!")
                 bookOption(cardNum)
             else:
