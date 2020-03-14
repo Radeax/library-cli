@@ -188,21 +188,3 @@ def selectBorBook(branchId, branchName, branchLocation, cardNum):
 				'''
 
     print("\nMoving to previous page...")
-
-
-def validCardNum(inp):
-    try:
-        int(inp)
-    except ValueError:
-        print("\n-------------------------\nInvalid input. Try Again\n-------------------------\n")
-        print("\nWrong data type, please use an integer.\n")
-        return False
-    else:
-        # Check if in range
-        if int(inp) < 0:
-            print(
-                "\n-------------------------\nInvalid input. Try Again\n-------------------------\n")
-            print("\nYour input should be a positive number.\n")
-            return False
-        else:
-            return True
