@@ -2,7 +2,7 @@ import check
 # import mysql.connector
 from librarysql import *
 
-initialData()  # Only run on a library database with no data
+# initialData()  # Only run on a library database with no data
 borrower = []
 borrowerIds = getIds("tbl_borrower")
 borrowers = getTableData("tbl_borrower")
