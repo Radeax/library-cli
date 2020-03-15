@@ -2,16 +2,19 @@
 
 import mysql.connector
 
+
 def getConnection():
-	return mysql.connector.connect(
-		host="localhost",
-		user="root",
-		passwd="root",
-		database="library"
-	)
- 
+    return mysql.connector.connect(
+        host="localhost",
+        user="root",
+        passwd="root",
+        database="library"
+    )
+
+
 mydb = getConnection()
 mycursor = mydb.cursor()
+
 
 def alter(state, msg):
     result = mycursor.execute(state, multi=True)
@@ -103,6 +106,12 @@ def getBranchName(branchId):
     return mycursor.fetchall()[0][0]
 
 
+def getAllBranches():
+    mycursor.execute(
+        f"SELECT * FROM tbl_library_branch")
+    return mycursor.fetchall()
+
+
 def getDueDate(bookId, branchId, cardNo):
     mycursor.execute(
         f"SELECT dueDate FROM tbl_book_loans WHERE bookId = {bookId} AND branchId = {branchId} AND cardNo = {cardNo}")
@@ -157,12 +166,12 @@ def initialData():
         raise e
 
     try:
-        
-        #INSERT PUBLISHERS
+
+        # INSERT PUBLISHERS
         alter("INSERT INTO tbl_publisher (publisherID, publisherName, publisherAddress, publisherPhone) VALUES (1, 'Book Guys', '123 Fake St, Indiana', '555-333-2222')", "done")
         alter("INSERT INTO tbl_publisher (publisherID, publisherName, publisherAddress, publisherPhone) VALUES (2, 'Book Makers', '321 Some St, Iowa', '999-777-8888')", "done")
         alter("INSERT INTO tbl_publisher (publisherID, publisherName, publisherAddress, publisherPhone) VALUES (3, 'We Make Books', '444 Totally Real St, Florida', '101-010-1010')", "done")
-        
+
         # INSERT BORROWERS
         alter("INSERT INTO tbl_borrower (name, address) VALUES ('Tom Jerry', '987 Some Place, Kansas')", "done")
         alter("INSERT INTO tbl_borrower (name, address) VALUES ('Jerry Lee Lewis', 'New York, New York')", "done")
@@ -222,7 +231,7 @@ def initialData():
         alter("INSERT INTO tbl_book_copies (bookId, branchId, noOfCopies) VALUES (4, 4, 8)", "done")
         alter("INSERT INTO tbl_book_copies (bookId, branchId, noOfCopies) VALUES (5, 4, 9)", "done")
         alter("INSERT INTO tbl_book_copies (bookId, branchId, noOfCopies) VALUES (6, 4, 5)", "done")
-        
+
         # INSERT BOOK-COPIES
         alter("INSERT INTO tbl_book_loans (bookId, branchId, cardNo, dateOut, dueDate) VALUES (1, 1, 1, '2020-03-10', '2020-03-17')", "done")
         alter("INSERT INTO tbl_book_loans (bookId, branchId, cardNo, dateOut, dueDate) VALUES (2, 2, 2, '2020-03-12', '2020-03-19')", "done")
@@ -233,8 +242,6 @@ def initialData():
         alter("INSERT INTO tbl_book_loans (bookId, branchId, cardNo, dateOut, dueDate) VALUES (2, 1, 1, '2020-03-12', '2020-03-19')", "done")
         alter("INSERT INTO tbl_book_loans (bookId, branchId, cardNo, dateOut, dueDate) VALUES (6, 4, 2, '2020-03-11', '2020-03-18')", "done")
         alter("INSERT INTO tbl_book_loans (bookId, branchId, cardNo, dateOut, dueDate) VALUES (4, 1, 1, '2020-03-10', '2020-03-17')", "done")
-        
-        
 
         mydb.commit()
     except Exception as e:
