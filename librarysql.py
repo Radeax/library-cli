@@ -136,13 +136,13 @@ def updateBookCop(bookId, numOfCop, branchId):
 
 def updateBranchName(branchId, newBranchName):
     mycursor.execute(
-        f"UPDATE tbl_library_branch SET branchName = {newBranchName} WHERE branchId = {branchId}")
+        f"UPDATE tbl_library_branch SET branchName = '{newBranchName}' WHERE branchId = '{branchId}'")
     mydb.commit()
 
 
 def updateBranchLocation(branchId, newBranchAddress):
     mycursor.execute(
-        f"UPDATE tbl_library_branch SET branchAddress = {newBranchAddress} WHERE branchId = {branchId}")
+        f"UPDATE tbl_library_branch SET branchAddress = '{newBranchAddress}' WHERE branchId = '{branchId}'")
     mydb.commit()
 
 
