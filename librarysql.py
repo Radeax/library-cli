@@ -128,6 +128,24 @@ def getNumCopy(bookId, branchId):
         return 0
 
 
+def updateBookCop(bookId, numOfCop, branchId):
+    mycursor.execute(
+        f"UPDATE tbl_book_copies SET noOfCopies = {numOfCop} WHERE bookId = {bookId} AND branchId = {branchId}")
+    mydb.commit()
+
+
+def updateBranchName(branchId, newBranchName):
+    mycursor.execute(
+        f"UPDATE tbl_library_branch SET branchName = {newBranchName} WHERE branchId = {branchId}")
+    mydb.commit()
+
+
+def updateBranchLocation(branchId, newBranchAddress):
+    mycursor.execute(
+        f"UPDATE tbl_library_branch SET branchAddress = {newBranchAddress} WHERE branchId = {branchId}")
+    mydb.commit()
+
+
 def getIds(tableName):
     if "genre" in tableName:
         mycursor.execute(f"SELECT genre_id FROM {tableName}")
