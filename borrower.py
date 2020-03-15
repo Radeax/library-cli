@@ -147,35 +147,39 @@ def selectBorBook(branchId, cardNum):
 
     numLoans = len(loans)
     print("NumLoans =", numLoans)
+    bookInp = 0
 
     if numLoans == 0:
         print("\nYou do not have any outstanding book loans.\n")
     else:
-        print(f"\nHere are the books owned by borrower #{cardNum}.")
-        print("\nPlease select a book to return:\n")
-        for i in range(0, numLoans):
-            # Allows for change in number of books
-            bookID = loans[i][0]
-            title = getBookTitle(bookID)
-            authorID = getAuthorID(bookID)
-            author = getAuthorName(authorID)
-            dueDate = getDueDate(bookID, branchId, cardNum)
-            print(f"{i+1}) {title} by {author} (Due on {dueDate}")
-        print(f"{numLoans + 1}) Quit to previous page\n")
+        while numLoans != 0:
+            loans = getBorrowedBooks(branchId, cardNum)
+            numLoans = len(loans)
+            print(f"\nHere are the books owned by borrower #{cardNum}.")
+            print("\nPlease select a book to return:\n")
+            for i in range(0, numLoans):
+                # Allows for change in number of books
+                bookID = loans[i][0]
+                title = getBookTitle(bookID)
+                authorID = getAuthorID(bookID)
+                author = getAuthorName(authorID)
+                dueDate = getDueDate(bookID, branchId, cardNum)
+                print(f"{i+1}) {title} by {author} (Due on {dueDate}")
+            print(f"{numLoans + 1}) Quit to previous page\n")
 
-        bookInp = 0
-        # Take input from user and take appropriate action
-        bookInp = input(
-            f"Please enter a number between 1 and {numLoans + 1}: ")
-        if check.validInput(bookInp, 1, numLoans + 1):
-            bookInp = int(bookInp)
-            # If quit not selected
-            if bookInp != (numLoans + 1):
-                myBook = loans[bookInp - 1]
-                print(f"\nYou picked {myBook[1]} with id: {myBook[0]}")
-                print(
-                    f"\nYou are returning 1 copy of {myBook[1]} to {getBranchName(branchId)}.")
-                myBookID = myBook[0]
-                processReturn(myBookID, branchId, cardNum)
+            # bookInp = 0
+            # Take input from user and take appropriate action
+            bookInp = input(
+                f"Please enter a number between 1 and {numLoans + 1}: ")
+            if check.validInput(bookInp, 1, numLoans + 1):
+                bookInp = int(bookInp)
+                # If quit not selected
+                if bookInp != (numLoans + 1):
+                    myBook = loans[bookInp - 1]
+                    print(f"\nYou picked {myBook[1]} with id: {myBook[0]}")
+                    print(
+                        f"\nYou are returning 1 copy of {myBook[1]} to {getBranchName(branchId)}.")
+                    myBookID = myBook[0]
+                    processReturn(myBookID, branchId, cardNum)
 
     print("\nMoving to previous page...")
