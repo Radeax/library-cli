@@ -1,7 +1,14 @@
 import check
+from librarysql import * 
+#initialData()
 
-#Lib1, If Librarian is chosen
+
+
+
+
+
 def runLibrarian():
+
 	#This input will be for the Librarian menu
 	print("\nYour input was 1, You are a Librarian\n")
 	inp = 0	
@@ -20,11 +27,8 @@ def runLibrarian():
 
 #Lib2, Select branch you manage
 def selectBranch():
-	#IMPORTANT NOTE
-	#**Probably need function to grab libraries from database, this will change**
-	libraries = {1: ["University Library", "Boston"], 2: ["State Library", "New York"], 
-				3: ["Federal Library", "Washington DC"], 4: ["County Library", "McLean VA"],
-				5: ["Test Library", "Maryland"]}
+
+	libraries = getTableData("tbl_library_branch")
 
 	#numBranches + 1 will be our quit option
 	numBranches = len(libraries)
@@ -34,9 +38,10 @@ def selectBranch():
 	while libInp != (numBranches + 1):
 		print("\nWhich branch do you manage?\n")
 		#Print out options
-		for bId, location in libraries.items():
+		#for bId, location in libraries.items():
+		for i in range(0,len(libraries)):
 			#Allows for change in number of libraries
-			print("{0}) {1}, {2}".format(bId, location[0], location[1]))
+			print("{0}) {1}, {2}".format(libraries[i][0], libraries[i][1], libraries[i][2]))
 		print("{0}) Quit to previous page\n".format(numBranches + 1))
 
 		#Take input from user and take appropriate action
@@ -47,15 +52,18 @@ def selectBranch():
 				#Quit Lib2 to Lib1
 				print("\nMoving to previous page...")
 			else:
+				#print (libraries)
 				#Move to Lib 3
-				adjustLibrary(libInp, libraries[libInp][0], libraries[libInp][1])
+				branchIds=getIds("tbl_library_branch")
+				adjustLibrary(branchIds[libInp-1], libraries[libInp-1][1], libraries[libInp-1][2],libraries)
 
 #Lib3, 1) Update Branch Name/Location, 2) Update Numbers of Book Copies
-def adjustLibrary(branchId, branchName, branchLocation):
+def adjustLibrary(branchId, branchName, branchLocation, libraries):
 	#Same thing as above
 	inp = 0
 	#In Lib3, for picking library actions
 	while inp != 3:
+		libraries=getTableData("tbl_library_branch")
 		print("\nLibrary functions of library #{:d}".format(branchId))
 		print("\nAt location: {0}, {1}".format(branchName, branchLocation))
 		#List Lib3 options
@@ -65,15 +73,18 @@ def adjustLibrary(branchId, branchName, branchLocation):
 			inp = int(inp)
 			#Option 1, Update Library Branch
 			if inp == 1:
-				changeBranchInfo(branchId, branchName, branchLocation)
+				changeBranchInfo(branchId, branchName, branchLocation, libraries)
+				libraries=getTableData("tbl_library_branch")
+				branchName=libraries[branchId-1][1]
+				branchLocation=libraries[branchId-1][2]
 			#Option 2, Update Book count
 			elif inp == 2:
-				updateBookCount(branchId, branchName, branchLocation)
+				updateBookCount(branchId, branchName, branchLocation, libraries)
 			else:
 				print("\nMoving to previous page...")
 
 #Option 1, Change name and location of the branch
-def changeBranchInfo(branchId, branchName, branchLocation):
+def changeBranchInfo(branchId, branchName, branchLocation, libraries):
 	print("\nUpdate details of:", branchName)
 	print("Branch ID:", branchId)
 	print("Branch Location:", branchLocation)
@@ -86,30 +97,37 @@ def changeBranchInfo(branchId, branchName, branchLocation):
 	print("\nYou wrote:{0}\n".format(nameInput))
 	if nameInput == "quit":
 		return
+	#libraries[branchId][1]=nameInput
+	updateBranchName(branchId,nameInput)
 	#This will tell us what to update the address to
 	locInput = input("Please enter new branch address or enter N/A for no change:\n")
 	print("\nYou wrote:{0}\n".format(locInput))
 	if locInput == "quit":
 		return
+
+	#libraries[branchId][2]=locInput#updates instance of table
+	updateBranchLocation(branchId,locInput)
 	
 #Option 2, Update number of books there are
-def updateBookCount(branchId, branchName, branchLocation):
+def updateBookCount(branchId, branchName, branchLocation,table):
 	MAX_BOOKS = 10000
+	availableBooks= getAvailBooks(branchId)
+	listOfCopies= getTableData("tbl_book_copies")
+	#listOfcopies= method(bookcpies)
 
 	print("\nChange number of copies of books at:", branchName)
 	print("Branch ID:", branchId)
 	print("Branch Location:", branchLocation)
 	
-	#**THIS WILL NEED A SQL QUERY TO POPULATE**
-	books = {1: ["The Lost Tribe", "Sidney Sheldon", 5], 2: ["The Haunting", "Stephen King", 3],
-			3: ["Microtrends", "Sidney Sheldon", 10], 4: ["Test Book", "John Jackson", 2]}
 	
 	bookInp = 0
-	numBooks = len(books)
+	numBooks = len(availableBooks)
 	print("\nPick the Book you want to add copies of, to your branch:\n")
-	for bId, bInfo in books.items():
-		#Allows for change in number of books
-		print("{0}) {1} by {2}".format(bId, bInfo[0], bInfo[1]))
+	
+	for i in range(0,len(availableBooks)):
+		
+		print("{0}) {1} {2}".format(availableBooks[i][0], getBookTitle(availableBooks[i][0]), availableBooks[i][2]))
+		#print("{0}) {1} by {2}".format(i, listOfCopies[i][1], listOfCopies[i][2]))
 	print("{0}) Quit to previous page\n".format(numBooks + 1))
 
 	#Take input from user and take appropriate action
@@ -117,15 +135,18 @@ def updateBookCount(branchId, branchName, branchLocation):
 	if check.validInput(bookInp, 1, numBooks + 1):
 		bookInp = int(bookInp)
 		if bookInp != (numBooks + 1):
-			print("\nYou picked {0}".format(books[bookInp][0]))
-			print("\nExisting number of copies: {0}".format(books[bookInp][2]))
+			print("\nYou picked {0} {1}".format(availableBooks[bookInp-1][0],getBookTitle(availableBooks[bookInp-1][0])))
+			print("\nExisting number of copies: {0}".format(availableBooks[bookInp-1][2]))
 			#Enter new amount of copies
 			newBookCount = input("Enter new number of copies: ")
 			if  check.validInput(newBookCount, 0, MAX_BOOKS):
 				newBookCount = int(newBookCount)
+
 				#***Needs to send newBookCount to the database***
 				print("\nYou entered {0}, this will be updated in DB".format(newBookCount))
 				'''
 						ADD SQL CODE HERE
 				'''
+				#listOfCopies[bookInp][2]=newBookCount
+				updateBookCop(bookInp,newBookCount,branchId)
 		print("\nMoving to previous page...")
