@@ -1,5 +1,6 @@
 import check
 # import mysql.connector
+from datetime import datetime
 from librarysql import *
 
 # initialData()  # Only run on a library database with no data
@@ -163,8 +164,9 @@ def selectBorBook(branchId, cardNum):
                 title = getBookTitle(bookID)
                 authorID = getAuthorID(bookID)
                 author = getAuthorName(authorID)
-                dueDate = getDueDate(bookID, branchId, cardNum)
-                print(f"{i+1}) {title} by {author} (Due on {dueDate}")
+                dueDate = getDueDate(
+                    bookID, branchId, cardNum).strftime("%a, %m/%d/%Y")
+                print(f"{i+1}) {title} by {author} | Due Date: {dueDate})")
             print(f"{numLoans + 1}) Quit to previous page\n")
 
             # bookInp = 0
