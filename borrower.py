@@ -183,5 +183,7 @@ def selectBorBook(branchId, cardNum):
                         f"\nYou are returning 1 copy of {myBook[1]} to {getBranchName(branchId)}.")
                     myBookID = myBook[0]
                     processReturn(myBookID, branchId, cardNum)
+                else:
+                    break
 
     print("\nMoving to previous page...")
