@@ -159,10 +159,10 @@ def getIds(tableName):
         mycursor.execute(
             f"SELECT publisherId FROM {tableName} ORDER BY publisherId")
     elif "book" in tableName:
-        mycursor.execute(f"bookId FROM {tableName} ORDER BY bookId")
+        mycursor.execute(f"SELECT bookId FROM {tableName} ORDER BY bookId")
     elif "author" in tableName:
         mycursor.execute(
-            f"SELECT tbl_author FROM {tableName} ORDER BY tbl_author")
+            f"SELECT authorId FROM {tableName} ORDER BY authorId")
     elif "branch" in tableName:
         mycursor.execute(f"SELECT branchId FROM {tableName} ORDER BY branchId")
     elif "borrower" in tableName:
@@ -273,50 +273,3 @@ def initialData():
     except Exception as e:
         mydb.rollback()
         raise e
-
-# # SELECTS ALL THEN STORE RESULTS
-# mycursor.execute("SELECT * FROM tbl_library_branch")
-# branches = mycursor.fetchall()
-
-# mycursor.execute("SELECT * FROM tbl_author")
-# authors = mycursor.fetchall()
-
-# mycursor.execute("SELECT * FROM tbl_book")
-# books = mycursor.fetchall()
-
-# mycursor.execute("SELECT * FROM tbl_book_authors")
-# bookAuthors = mycursor.fetchall()
-
-# # PRINT RESULTS
-# for branch in branches:
-#   print(branch)
-
-# for author in authors:
-#   print(author)
-
-# for book in books:
-#   print(book)
-
-# for bookAuthor in bookAuthors:
-#   print(bookAuthor)
-
-# alter("INSERT INTO tbl_borrower (name, address) VALUES ('Bob Tom', '321')","done")
-# mydb.commit()
-# mycursor.execute("SELECT cardNo FROM tbl_borrower")
-# # borrowers = mycursor.fetchall()
-# borrowers = [item[0] for item in mycursor.fetchall()]
-# for borrower in borrowers:
-#   print(borrower)
-# print(borrowers)
-
-# cardNum = input("Enter your card number:\n")
-# cardNum = int(cardNum)
-# print("\nCard number:", cardNum)
-
-# if cardNum in borrowers:
-# 	print("\nWelcome {0}!".format(borrowers[cardNum-1]))
-# else:
-# 	print("\nCard number not found. Please try again.\n")
-
-# # mycursor.execute("UPDATE tbl_book SET title = 'The Test Title' WHERE bookId = 2")
-# # mydb.commit()
