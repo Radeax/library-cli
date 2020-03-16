@@ -136,29 +136,29 @@ def updateBookCop(bookId, numOfCop, branchId):
 
 def updateBranchName(branchId, newBranchName):
     mycursor.execute(
-        f"UPDATE tbl_library_branch SET branchName = '{newBranchName}' WHERE branchId = '{branchId}'")
+        f"UPDATE tbl_library_branch SET branchName = {newBranchName} WHERE branchId = {branchId}")
     mydb.commit()
 
 
 def updateBranchLocation(branchId, newBranchAddress):
     mycursor.execute(
-        f"UPDATE tbl_library_branch SET branchAddress = '{newBranchAddress}' WHERE branchId = '{branchId}'")
+        f"UPDATE tbl_library_branch SET branchAddress = {newBranchAddress} WHERE branchId = {branchId}")
     mydb.commit()
 
 
 def getIds(tableName):
     if "genre" in tableName:
-        mycursor.execute(f"SELECT genre_id FROM {tableName}")
+        mycursor.execute(f"SELECT genre_id FROM {tableName} ORDER BY genre_id;")
     elif "publisher" in tableName:
-        mycursor.execute(f"SELECT publisherId FROM {tableName}")
+        mycursor.execute(f"SELECT publisherId FROM {tableName} ORDER BY publisherId;")
     elif "book" in tableName:
-        mycursor.execute(f"bookId FROM {tableName}")
+        mycursor.execute(f"SELECT bookId FROM {tableName} ORDER BY bookId;")
     elif "author" in tableName:
-        mycursor.execute(f"SELECT tbl_author FROM {tableName}")
+        mycursor.execute(f"SELECT authorId FROM {tableName} ORDER BY authorId;")
     elif "branch" in tableName:
-        mycursor.execute(f"SELECT branchId FROM {tableName}")
+        mycursor.execute(f"SELECT branchId FROM {tableName} ORDER BY branchId;")
     elif "borrower" in tableName:
-        mycursor.execute(f"SELECT cardNo FROM {tableName}")
+        mycursor.execute(f"SELECT cardNo FROM {tableName} ORDER BY cardNo;")
 
     return [item[0] for item in mycursor.fetchall()]
 
