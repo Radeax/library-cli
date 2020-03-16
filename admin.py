@@ -599,14 +599,20 @@ def overrideDueDate():
                             cursor = connection.cursor()
                             cursor.execute("SELECT * FROM tbl_book_loans WHERE cardNo = %s", (cardNum,))
                             borLoans = cursor.fetchall()
+                            #This will show the loans with the book title and branch name
+                            stmt = "SELECT bor.name, lb.branchName, b.title, bl.dateOut, bl.dueDate FROM tbl_book AS b, tbl_book_loans AS bl, tbl_borrower AS bor, tbl_library_branch AS lb WHERE b.bookId = bl.bookId AND bor.cardNo = bl.cardNo AND lb.branchId = lb.branchId AND bor.cardNo = %s;"
+                            cursor.execute(stmt, (cardNum,))
+                            borLoanNames = cursor.fetchall()
                         except Exception as e:
                             raise e
                         finally:
                             connection.close()
                             cursor.close()
-                        #Print options to user
+                        #Print show user what loans the borrower has
                         for i in range(0, loanCount):
-                            print(f"{i+1}) {borLoans[i]}")
+                            dateOut = borLoanNames[i][3].strftime("%m-%d-%y")
+                            dueDate = borLoanNames[i][4].strftime("%m-%d-%y")
+                            print(f"{i+1}) Branch: {borLoanNames[i][1]}, Book: {borLoanNames[i][2]}, Date Out: {dateOut}, Due Date: {dueDate}")
                         print(f"{loanCount+1}) To quit to previous menu")
                         loanInp = input(f"\nPlease enter a number between 1 and {loanCount+1}: ")
                         if check.validInput(loanInp, 1, loanCount + 1):
