@@ -10,17 +10,49 @@ def getConnection():
         passwd="root",
         database="library"
     )
-
-
-mydb = getConnection()
-mycursor = mydb.cursor()
-
-
-def alter(state, msg):
-    result = mycursor.execute(state, multi=True)
-    result.send(None)
-    print(msg, result)
-
+ 
+def getTableData(tableName):
+    connection = getConnection()
+    try:
+        cursor = connection.cursor()
+        cursor.execute(f"SELECT * FROM {tableName}")
+        result = cursor.fetchall()
+        connection.commit()
+        return [list(item) for item in result]
+    except Error as e:
+        print(e)
+    finally:
+        connection.close()
+        cursor.close()
+        
+ 
+def getIds(tableName):
+    if tableName == 'tbl_genre':
+        idName = 'genre_id'
+    elif tableName == 'tbl_publisher':
+        idName = 'publisherId'
+    elif tableName == 'tbl_book':
+        idName = 'bookId'
+    elif tableName == 'tbl_author':
+        idName = 'authorId'
+    elif tableName == 'tbl_library_branch':
+        idName = 'branchId'
+    elif tableName == 'tbl_borrower':
+        idName = 'cardNo'
+    connection = getConnection()
+    try:
+        cursor = connection.cursor()
+        sql = f"SELECT {idName} FROM {tableName} ORDER BY {idName}"
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        connection.commit()
+        return [item[0] for item in result]
+    except Error as e:
+        print(e)
+    finally:
+        connection.close()
+        cursor.close()
+        
 
 def checkout(bookId, branchId, cardNo):
     addBookLoan(bookId, branchId, cardNo)
@@ -28,15 +60,35 @@ def checkout(bookId, branchId, cardNo):
 
 
 def addBookCopy(bookId, branchId):
-    mycursor.execute(
-        f"UPDATE tbl_book_copies SET noOfCopies = noOfCopies + 1 WHERE bookId = {bookId} AND branchId = {branchId}")
-    mydb.commit()
+    connection = getConnection()
+    try:
+        cursor = connection.cursor()
+        stmt = "UPDATE tbl_book_copies SET noOfCopies = noOfCopies + 1 WHERE bookId = %s AND branchId = %s;"
+        data = (bookId, branchId)
+        cursor.execute(stmt, data)
+        connection.commit()
+    except Exception as e:
+        connection.rollback()
+        raise e
+    finally:
+        connection.close()
+        cursor.close()
 
 
 def removeBookLoan(bookId, branchId, cardNo):
-    mycursor.execute(
-        f"DELETE FROM tbl_book_loans WHERE bookId = {bookId} AND branchId = {branchId} AND cardNo = {cardNo}")
-    mydb.commit()
+    connection = getConnection()
+    try:
+        cursor = connection.cursor()
+        stmt = "DELETE FROM tbl_book_loans WHERE bookId = %s AND branchId = %s AND cardNo = %s;"
+        data = (bookId, branchId, cardNo)
+        cursor.execute(stmt, data)
+        connection.commit()
+    except Exception as e:
+        connection.rollback()
+        raise e
+    finally:
+        connection.close()
+        cursor.close()
 
 
 def processReturn(bookId, branchId, cardNo):
@@ -45,125 +97,238 @@ def processReturn(bookId, branchId, cardNo):
 
 
 def addBookLoan(bookId, branchId, cardNo):
-    mycursor.execute(
-        f"INSERT INTO tbl_book_loans (bookId, branchId, cardNo, dateOut, dueDate) VALUES ({bookId}, {branchId}, {cardNo}, CURDATE(), DATE(CURDATE() + 7))")
-    mydb.commit()
+    connection = getConnection()
+    try: 
+        cursor = connection.cursor()
+        stmt = "INSERT INTO tbl_book_loans (bookId, branchId, cardNo, dateOut, dueDate) VALUES (%s, %s, %s, CURDATE(), DATE(CURDATE() + 7));"
+        data = (bookId, branchId, cardNo)
+        cursor.execute(stmt, data)
+        connection.commit()
+    except Exception as e:
+        connection.rollback()
+        raise e
+    finally:
+        connection.close()
+        cursor.close()
 
 
 def removeBookCopy(bookId, branchId):
-    mycursor.execute(
-        f"UPDATE tbl_book_copies SET noOfCopies = noOfCopies - 1 WHERE bookId = {bookId} AND branchId = {branchId}")
-    mydb.commit()
+    connection = getConnection()
+    try:
+        cursor = connection.cursor()
+        stmt = "UPDATE tbl_book_copies SET noOfCopies = noOfCopies - 1 WHERE bookId = %s AND branchId = %s"
+        data = (bookId, branchId)
+        cursor.execute(stmt, data)
+        connection.commit()
+    except Exception as e:
+        connection.rollback()
+        raise e
+    finally:
+        connection.close()
+        cursor.close()
 
 
 def checkedOut(bookId, branchId, cardNo):
-    mycursor.execute(
-        f"SELECT * FROM tbl_book_loans WHERE bookId = {bookId} AND branchId = {branchId} AND cardNo = {cardNo}")
-    if len(mycursor.fetchall()) > 0:
-        return True
-    else:
-        return False
-
-
-def getTableData(tableName):
-    mycursor.execute(f"SELECT * FROM {tableName}")
-    return [list(item) for item in mycursor.fetchall()]
+    connection = getConnection()
+    try:
+        cursor = connection.cursor()
+        stmt = "SELECT * FROM tbl_book_loans WHERE bookId = %s AND branchId = %s AND cardNo = %s;"
+        data = (bookId, branchId, cardNo)
+        cursor.execute(stmt, data)
+        result = cursor.fetchall()
+        if len(result) > 0:
+            return True
+        else:
+            return False
+    finally:
+        connection.close()
+        cursor.close()
+        
 
 
 def getAuthorName(authorId):
-    mycursor.execute(
-        f"SELECT authorName FROM tbl_author WHERE authorId = {authorId}")
-    return mycursor.fetchall()[0][0]
+    connection = getConnection()
+    try:
+        cursor = connection.cursor()
+        cursor.execute(f"SELECT authorName FROM tbl_author WHERE authorId = {authorId}")
+        result = cursor.fetchall()
+        connection.commit()
+        return result[0][0]
+    finally:
+        connection.close()
+        cursor.close()
+        
 
 
 def getAuthorID(bookId):
-    mycursor.execute(
-        f"SELECT authorId FROM tbl_book_authors WHERE bookId = {bookId}")
-    return mycursor.fetchall()[0][0]
+    connection = getConnection()
+    try:
+        cursor = connection.cursor()
+        cursor.execute(f"SELECT authorId FROM tbl_book_authors WHERE bookId = {bookId}")
+        result = cursor.fetchall()
+        connection.commit()
+        return result[0][0]
+    finally:
+        connection.close()
+        cursor.close()
 
 
 def getAvailBooks(branchId):
-    mycursor.execute(
-        f"SELECT * FROM tbl_book_copies WHERE branchId = {branchId} AND noOfCopies > 0")
-    return mycursor.fetchall()
+    connection = getConnection()
+    try:
+        cursor = connection.cursor()
+        cursor.execute(f"SELECT * FROM tbl_book_copies WHERE branchId = {branchId} AND noOfCopies > 0")
+        result = cursor.fetchall()
+        connection.commit()
+        return result
+    finally:
+        connection.close()
+        cursor.close()
+        
 
 
 def getBookTitle(bookId):
-    mycursor.execute(
-        f"SELECT title FROM tbl_book WHERE bookId = {bookId}")
-    return mycursor.fetchall()[0][0]
+    connection = getConnection()
+    try:
+        cursor = connection.cursor()
+        cursor.execute(f"SELECT title FROM tbl_book WHERE bookId = {bookId}")
+        result = cursor.fetchall()
+        connection.commit()
+        return result[0][0]
+    finally:
+        connection.close()
+        cursor.close()
+        
 
 
 def getBorrowedBooks(branchId, cardNo):
-    mycursor.execute(
-        f"SELECT bookId, dueDate FROM tbl_book_loans WHERE branchId = {branchId} AND cardNo = {cardNo}")
-    return mycursor.fetchall()
+    connection = getConnection()
+    try:
+        cursor = connection.cursor()
+        cursor.execute(f"SELECT bookId, dueDate FROM tbl_book_loans WHERE branchId = {branchId} AND cardNo = {cardNo}")
+        result = cursor.fetchall()
+        connection.commit()
+        return result
+    finally:
+        connection.close()
+        cursor.close()
 
 
 def getBranchName(branchId):
-    mycursor.execute(
-        f"SELECT branchName FROM tbl_library_branch WHERE branchId = {branchId}")
-    return mycursor.fetchall()[0][0]
+    connection = getConnection()
+    try:
+        cursor = connection.cursor()
+        cursor.execute(f"SELECT branchName FROM tbl_library_branch WHERE branchId = {branchId}")
+        result = cursor.fetchall()
+        connection.commit()
+        return result[0][0]
+    finally:
+        connection.close()
+        cursor.close()
 
 
 def getAllBranches():
-    mycursor.execute(
-        f"SELECT * FROM tbl_library_branch")
-    return mycursor.fetchall()
+    connection = getConnection()
+    try:
+        cursor = connection.cursor()
+        cursor.execute(f"SELECT * FROM tbl_library_branch")
+        result = cursor.fetchall()
+        connection.commit()
+        return result
+    finally:
+        connection.close()
+        cursor.close()
+        
 
 
 def getDueDate(bookId, branchId, cardNo):
-    mycursor.execute(
-        f"SELECT dueDate FROM tbl_book_loans WHERE bookId = {bookId} AND branchId = {branchId} AND cardNo = {cardNo}")
-    return mycursor.fetchall()[0][0]
+    connection = getConnection()
+    try:
+        cursor = connection.cursor()
+        cursor.execute(f"SELECT dueDate FROM tbl_book_loans WHERE bookId = {bookId} AND branchId = {branchId} AND cardNo = {cardNo}")
+        result = cursor.fetchall()
+        connection.commit()
+        return result[0][0]
+    finally:
+        connection.close()
+        cursor.close()
+        
 
 
 def getNumCopy(bookId, branchId):
-    mycursor.execute(
-        f"SELECT noOfCopies FROM tbl_book_copies WHERE bookId = {bookId} AND branchId = {branchId}")
-    copies = mycursor.fetchall()[0][0]
-    if copies > 0:
-        return copies
-    else:
-        return 0
-
+    connection = getConnection()
+    try:
+        cursor = connection.cursor()
+        cursor.execute(f"SELECT noOfCopies FROM tbl_book_copies WHERE bookId = {bookId} AND branchId = {branchId}")
+        result = cursor.fetchall()
+        connection.commit()
+        copies = result[0][0]
+        if copies > 0:
+            return copies
+        else:
+            return 0
+    finally:
+        connection.close()
+        cursor.close()
+        
 
 def updateBookCop(bookId, numOfCop, branchId):
-    mycursor.execute(
-        f"UPDATE tbl_book_copies SET noOfCopies = {numOfCop} WHERE bookId = {bookId} AND branchId = {branchId}")
-    mydb.commit()
+    connection = getConnection()
+    try:
+        cursor = connection.cursor()
+        stmt = "UPDATE tbl_book_copies SET noOfCopies = %s WHERE bookId = %s AND branchId = %s"
+        data = (numOfCop, bookId, branchId)
+        cursor.execute(stmt, data)
+        connection.commit()
+    except Exception as e:
+        connection.rollback()
+        raise e
+    finally:
+        connection.close()
+        cursor.close()
 
 
 def updateBranchName(branchId, newBranchName):
-    mycursor.execute(
-        f"UPDATE tbl_library_branch SET branchName = '{newBranchName}' WHERE branchId = '{branchId}'")
-    mydb.commit()
+    connection = getConnection()
+    try:
+        cursor = connection.cursor()
+        #Removed single quotes from %s's, see if problematic
+        stmt = "UPDATE tbl_library_branch SET branchName = %s WHERE branchId = %s"
+        data = (newBranchName, branchId)
+        cursor.execute(stmt, data)
+        connection.commit()
+    except Exception as e:
+        connection.rollback()
+        raise e
+    finally:
+        connection.close()
+        cursor.close()
 
 
 def updateBranchLocation(branchId, newBranchAddress):
-    mycursor.execute(
-        f"UPDATE tbl_library_branch SET branchAddress = '{newBranchAddress}' WHERE branchId = '{branchId}'")
-    mydb.commit()
+    connection = getConnection()
+    try:
+        cursor = connection.cursor()
+        stmt = "UPDATE tbl_library_branch SET branchAddress = %s WHERE branchId = %s;"
+        data = (newBranchAddress, branchId)
+        cursor.execute(stmt, data)
+        connection.commit()
+    except Exception as e:
+        connection.rollback()
+        raise e
+    finally:
+        connection.close()
+        cursor.close()
 
 
 def getAvailBooks2(branchId):
-    mycursor.execute(
-        f"SELECT * FROM tbl_book_copies WHERE branchId = {branchId}")
-    return mycursor.fetchall()
-
-
-def getIds(tableName):
-    if "genre" in tableName:
-        mycursor.execute(f"SELECT genre_id FROM {tableName} ORDER BY genre_id")
-    elif "publisher" in tableName:
-        mycursor.execute(f"SELECT publisherId FROM {tableName} ORDER BY publisherId")
-    elif "book" in tableName:
-        mycursor.execute(f"SELECT bookId FROM {tableName} ORDER BY bookId")
-    elif "author" in tableName:
-        mycursor.execute(f"SELECT authorId FROM {tableName} ORDER BY authorId")
-    elif "branch" in tableName:
-        mycursor.execute(f"SELECT branchId FROM {tableName} ORDER BY branchId")
-    elif "borrower" in tableName:
-        mycursor.execute(f"SELECT cardNo FROM {tableName} ORDER BY cardNo")
-
-    return [item[0] for item in mycursor.fetchall()]
+    connection = getConnection()
+    try:
+        cursor = connection.cursor()
+        cursor.execute(f"SELECT * FROM tbl_book_copies WHERE branchId = {branchId}")
+        result = cursor.fetchall()
+        connection.commit()
+        return result
+    finally:
+        connection.close()
+        cursor.close()
