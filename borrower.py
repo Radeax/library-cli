@@ -15,6 +15,8 @@ def runBorrower():
     print("\nYour input was 3, You are a Borrower\n")
     print(borrowers)
     print(borrowerIds)
+
+    # Get card number
     while cardNum not in borrowerIds:
         cardNum = input("Enter your card number:\n")
         if check.validCardNum(cardNum):
@@ -42,12 +44,10 @@ def bookOption(cardNum):
         if check.validInput(inp, 1, 3):
             inp = int(inp)
             print("\nYou selected", inp)
-            # Check out
             if inp == 1:
-                selectBranch(cardNum, True)
-            # Return book
+                selectBranch(cardNum, True)  # Check out book
             elif inp == 2:
-                selectBranch(cardNum, False)
+                selectBranch(cardNum, False)  # Return a book
             elif inp == 3:
                 print("\nMoving to main menu...")
 
@@ -139,10 +139,8 @@ def selectLibBook(branchId, cardNum):
                 print("\nMoving to previous page...")
                 break
 
-# Option 2, Return a book
 
-
-def selectBorBook(branchId, cardNum):
+def selectBorBook(branchId, cardNum):  # Option 2, Return a book
     loans = getBorrowedBooks(branchId, cardNum)
     print(getBorrowedBooks(branchId, cardNum))
 
@@ -169,7 +167,6 @@ def selectBorBook(branchId, cardNum):
                 print(f"{i+1}) {title} by {author} | Due Date: {dueDate})")
             print(f"{numLoans + 1}) Quit to previous page\n")
 
-            # bookInp = 0
             # Take input from user and take appropriate action
             bookInp = input(
                 f"Please enter a number between 1 and {numLoans + 1}: ")
