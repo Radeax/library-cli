@@ -230,14 +230,11 @@ def delete(tableName):
 						mydb.rollback()
 						raise e
 		else:
-			print("\nMoving to previous page...")	
-	#List entire table
-	#Take selection of row to delete
-	#Delete the row from the table(s)
+			print("\nMoving to previous page...")
 
 def addBookAuthor():
 	#Have user choose to add just a book, or add a new book and auth
-	print("\nWould you like to add a:\n\n1) Just a book, with existing author\n2) A book and an author\n3) To quit to previous")
+	print("\nWould you like to add:\n\n1) Just a book, with existing author\n2) A book and an author\n3) To quit to previous")
 	choice = input("\nPlease input an input between 1 and 3: ")
 	#If add type choice isn't to quit
 	if check.validInput(choice, 1, 3):
@@ -253,7 +250,6 @@ def addBookAuthor():
 			if titleInp in ('q', 'Q', 'quit', 'Quit', 'QUIT'):
 				print("\nMoving to previous page...")
 				return
-
 			#Give choice of publisher
 			publishers = getTableData('tbl_publisher')
 			pubIds = getIds('tbl_publisher')
@@ -283,7 +279,6 @@ def addBookAuthor():
 				else:
 					print("\nMoving to previous page...")
 					return
- 
 				#Want to assign an author that is already in the database
 				if choice == 1:
 					#Select an exiting author
@@ -303,7 +298,6 @@ def addBookAuthor():
 							#authorId is going to be based on user's selection
 							print(f"authIds(from getIds):{authIds}")
 							authId = authIds[authInp-1]
-							
 						#If quitting
 						else:
 							print("\nMoving to previous page...")
@@ -351,17 +345,142 @@ def addBookAuthor():
 		else:
 			print("\nMoving to previous page ...")
 	
-	#Add a book and author, or just a book
-	#tbl_book:bookID, title, pubId
-	#Select a publisher
-	
  
 def updateBookAuthor():
-	print("This will take more logic than the other tables to UPDATE")
+	#Have user choose to add just a book, or add a new book and auth
+	print("\nWould you like to update:\n\n1) Books\n2) Authors\n3) To quit to previous")
+	choice = input("\nPlease input an input between 1 and 3: ")
+	#If add type choice isn't to quit
+	if check.validInput(choice, 1, 3):
+		choice = int(choice)
+		if choice != 3:
+			inp = -1
+			numRows = -1
+			#List rows in table
+			while inp != numRows + 1:
+				#Grab table data, primary keys, and count the tuples for the entire table
+				#Should refresh after every update
+				if choice == 1:
+					tableName = 'tbl_book'
+				else:
+					tableName = 'tbl_author'
+				table = getTableData(tableName)
+				tIds = getIds(tableName)
+				numRows = len(table)
+				#Have user select row tuple to update
+				print(f"\nPlease select a row in {tableName} to update:\n")
+				for i in range(0,numRows):
+					print(f"{i+1}) {table[i]}")
+				print(f"{numRows+1}) To quit to previous menu")
+				inp = input(f"\nPlease enter a number between 1 and {numRows+1}: ")
+				if check.validInput(inp, 1, numRows + 1):
+					#Grab specific row based on selection
+					inp = int(inp)
+					#If not quit
+					if inp != numRows + 1:
+						#Based on selection, grab data tuple, and it's primary key
+						row = table[inp-1]
+						pKey = tIds[inp-1]
+						#Gonna have to do specific update based on table
+						#But all tables using this function have name and address
+						print("\nHere is the current name:", row[1])
+						nameInput = input("\nWhat would you like to change it to?(Limit to 45 characters), Type 'N/A' if you do not wish to change:\n")
+						if nameInput in ('N/A', 'n/a', 'NA', 'na'):
+							nameInput = row[1]
+						#Tailor update statement to match the table we're updating
+						if tableName == 'tbl_book':
+							#Give choice of publisher
+							publishers = getTableData('tbl_publisher')
+							pubIds = getIds('tbl_publisher')
+							numPubs = len(publishers)			
+							#List publishers in tbl_publisher, and have user choose one
+							for i in range(0, numPubs):
+								print(f"{i+1}) {publishers[i]}")
+							print(f"{numPubs+1}) Keep the same publisher")
+							pubInp = input(f"\nPlease enter a number between 1 and {numPubs+1}: ")
+							if check.validInput(pubInp, 1, numPubs+1):
+								pubInp = int(pubInp)
+								#If changing the publisher
+								if pubInp != numPubs + 1:
+									pubId = pubIds[pubInp-1]
+								else:
+									#Use the publisher Id of the book we selected
+									pubId = row[2]
+							stmt = "UPDATE tbl_book SET title = %s, pubId = %s WHERE bookId = %s;"
+							data = (nameInput, pubId, pKey)
+						elif tableName == 'tbl_author':
+							stmt = "UPDATE tbl_author SET authorName = %s WHERE authorId = %s;"
+							data = (nameInput, pKey)
+						#Send SQL statements to the database
+						try:
+							mycursor.execute(stmt, data)
+							mydb.commit()
+						except Exception as e:
+							mydb.rollback()
+							raise e
+					else:
+						print("\nMoving to previous page ...")
 
 def deleteBookAuthor():
-	print("This will take more logic than the other tables to DELETE")
-
+	inp = -1
+	numBooks = -1
+	#List rows in table
+	while inp != numBooks + 1:
+		books = getTableData('tbl_book')
+		bIds = getIds('tbl_book')
+		numBooks = len(books)
+		print(f"\nPlease select a book to delete:\n")
+		for i in range(0, numBooks):
+			print(f"{i+1}) {books[i]}")
+		print(f"{numBooks+1}) To quit to previous menu")
+		inp = input(f"\nPlease enter a number between 1 and {numBooks+1}: ")
+		if check.validInput(inp, 1, numBooks + 1):
+			#Grab specific row based on selection
+			inp = int(inp)
+			if inp != numBooks + 1:
+				book = books[inp-1]
+				#Let the user make sure of their decision
+				print(f"\nAre you sure you want to delete:\n{book}")
+				backout = input("\nType 'y' if you want to proceed: ")
+				if backout in ('y', 'Y', 'yes', 'Yes', 'YES'):
+					print(f"\nDeleting {book}...")
+					pKey = bIds[inp-1]
+     
+					stmt = "DELETE FROM tbl_book_authors WHERE bookId = %s;"
+					data = (pKey,)
+					try:
+						mycursor.execute(stmt, data)
+						mydb.commit()
+					except Exception as e:
+						mydb.rollback()
+						raise e	
+					stmt = "DELETE FROM tbl_book WHERE bookId = %s;"
+					try:
+						mycursor.execute(stmt, data)
+						mydb.commit()
+					except Exception as e:
+						mydb.rollback()
+						raise e
+					#Send SQL statements to the database
+					authorIds = getIds('tbl_author')
+					#Find all author ids in tbl_book_author
+					mycursor.execute("SELECT authorId FROM tbl_book_authors;")
+					bAuthorIds = [item[0] for item in mycursor.fetchall()]
+					badId = -1
+					#If author Id is in tbl_author but not in tbl_book_authors, then delete that author
+					#In other words, delete the author with no books
+					for aId in authorIds:
+						if aId not in bAuthorIds:
+							badId = aId
+							stmt = "DELETE FROM tbl_author WHERE authorId = %s;"
+							data = (badId,)
+							try:
+								mycursor.execute(stmt, data)
+								mydb.commit()
+							except Exception as e:
+								mydb.rollback()
+								raise e
+					
 def overrideDueDate():
 	inp = -1
 	numBors = -1 
