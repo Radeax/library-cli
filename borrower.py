@@ -1,5 +1,4 @@
 import check
-# import mysql.connector
 from datetime import datetime
 from librarysql import *
 
