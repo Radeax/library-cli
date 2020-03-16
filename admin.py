@@ -78,7 +78,8 @@ def add(tableName):
 		if phoneInput == 'quit':
 			return
 		#This gets executed by cursor
-		stmt = f"Insert into tbl_publisher values (NULL,'{nameInput}','{addrInput}','{phoneInput}');"
+		stmt = "Insert into tbl_publisher values (NULL,%s,%s,%s);"
+		data = (nameInput, addrInput, phoneInput)
 	elif tableName == 'tbl_library_branch':
 		print("\nPlease limit input to 45 characters.")
 		nameInput = input("What would you like to name the library branch(type 'quit' to quit)?:\n")
@@ -88,15 +89,10 @@ def add(tableName):
 		addrInput = input("What is the address of the library branch(type 'quit' to quit)?:\n")
 		if addrInput == 'quit':
 			return
-		stmt = f"Insert into tbl_library_branch values (NULL,'{nameInput}','{addrInput}');"
+		stmt = "Insert into tbl_library_branch values (NULL,%s,%s);"
+		data = (nameInput, addrInput)
 
-	elif tableName == 'tbl_borrower':	
-		#Either can auto increment card number or enter it manually
-		#If manual, will need to do some value checking		
-		#print("Please limit input to 45 characters.")
-		#cardInput = input("What should the card number be(type 'quit' to quit)?:\n")
-		#if cardInput == 'quit':
-		#	return
+	elif tableName == 'tbl_borrower':
 		print("\nPlease limit input to 45 characters.")
 		nameInput = input("What would you like to name the borrower(type 'quit' to quit)?:\n")
 		if nameInput == 'quit':
@@ -109,10 +105,11 @@ def add(tableName):
 		phoneInput = input("What is the phone number of the borrower(type 'quit' to quit)?:\n")
 		if phoneInput == 'quit':
 			return
-		stmt = f"Insert into tbl_borrower values (NULL,'{nameInput}','{addrInput}','{phoneInput}');"
+		stmt = "Insert into tbl_borrower values (NULL,%s,%s,%s);"
+		data = (nameInput, addrInput, phoneInput)
 
 	try:
-		mycursor.execute(stmt)
+		mycursor.execute(stmt, data)
 		mydb.commit()
 	except Exception as e:
 		mydb.rollback()
@@ -147,6 +144,8 @@ def update(tableName):
 				print("\nHere is the current name:", row[1])
 				nameInput = input("\nWhat would you like to change it to?(Limit to 45 characters), Type 'N/A' if you do not wish to change:\n")
 				if nameInput in ('N/A', 'n/a', 'NA', 'na'):
+					#Since all tables her have data in the same order (id, name, addr), we leverage that to simplify these statements
+					#We could potentially use a conditional to tailor what index the data came from if that wasn't the case
 					nameInput = row[1]
 				print("\nHere is the current address:", row[2])
 				addrInput = input("\nWhat would you like to change it to?(Limit to 45 characters), Type 'N/A' if you do not wish to change:\n")
@@ -162,15 +161,18 @@ def update(tableName):
 	  
 				#Tailor update statement to match the table we're updating
 				if tableName == 'tbl_publisher':
-					stmt = f"UPDATE tbl_publisher SET publisherName = '{nameInput}', publisherAddress = '{addrInput}', publisherPhone = '{phoneInput}' WHERE publisherId = {pKey};"
+					stmt = "UPDATE tbl_publisher SET publisherName = %s, publisherAddress = %s, publisherPhone = %s WHERE publisherId = %s;"
+					data = (nameInput, addrInput, phoneInput, pKey)
 				elif tableName == 'tbl_library_branch':
-					stmt = f"UPDATE tbl_library_branch SET branchName = '{nameInput}', branchAddress = '{addrInput}' WHERE branchId = {pKey};"
+					stmt = "UPDATE tbl_library_branch SET branchName = %s, branchAddress = %s WHERE branchId = %s;"
+					data = (nameInput, addrInput, phoneInput, pKey)
 				elif tableName == 'tbl_borrower':
-					stmt = f"UPDATE tbl_borrower SET name = '{nameInput}', address = '{addrInput}', phone = '{phoneInput}' WHERE cardNo = {pKey};"
+					stmt = "UPDATE tbl_borrower SET name = %s, address = %s, phone = %s WHERE cardNo = %s;"
+					data = (nameInput, addrInput, phoneInput, pKey)
 				
 				#Send SQL statements to the database
 				try:
-					mycursor.execute(stmt)
+					mycursor.execute(stmt, data)
 					mydb.commit()
 				except Exception as e:
 					mydb.rollback()
@@ -210,16 +212,19 @@ def delete(tableName):
 					#Gonna have to do specific delete based on table
 					if tableName == 'tbl_publisher':
 						#Delete the chosen row from the database
-						stmt = f"DELETE FROM tbl_publisher WHERE publisherId = {pKey};"
+						stmt = "DELETE FROM tbl_publisher WHERE publisherId = %s;"
+						data = (pKey)
 					elif tableName == 'tbl_library_branch':
 						#Delete the chosen row from the database
-						stmt = f"DELETE FROM tbl_library_branch WHERE branchId = {pKey};"
+						stmt = "DELETE FROM tbl_library_branch WHERE branchId = %s;"
+						data = (pKey)
 					elif tableName == 'tbl_borrower':
 						#Delete the chosen row from the database
-						stmt = f"DELETE FROM tbl_borrower WHERE cardNo = {pKey};"
+						stmt = "DELETE FROM tbl_borrower WHERE cardNo = %s;"
+						data = (pKey)
 					#Send SQL statement to the database
 					try:
-						mycursor.execute(stmt)
+						mycursor.execute(stmt, data)
 						mydb.commit()
 					except Exception as e:
 						mydb.rollback()
@@ -231,8 +236,126 @@ def delete(tableName):
 	#Delete the row from the table(s)
 
 def addBookAuthor():
-	print("This will take more logic than the other tables to ADD")
+	#Have user choose to add just a book, or add a new book and auth
+	print("\nWould you like to add a:\n\n1) Just a book, with existing author\n2) A book and an author\n3) To quit to previous")
+	choice = input("\nPlease input an input between 1 and 3: ")
+	#If add type choice isn't to quit
+	if check.validInput(choice, 1, 3):
+		choice = int(choice)
+		#If user didn't select quit
+		if choice != 3:
+			#get book title to input into db
+			print("\nPlease limit to 45 characters.")
+			#If title is 'quit' then go to previous page
+			#tileInp going into 
+			titleInp = input("Please enter the title of the new book (type 'quit' to cancel):\n")
+			#If user types quit
+			if titleInp in ('q', 'Q', 'quit', 'Quit', 'QUIT'):
+				print("\nMoving to previous page...")
+				return
 
+			#Give choice of publisher
+			publishers = getTableData('tbl_publisher')
+			pubIds = getIds('tbl_publisher')
+			numPubs = len(publishers)			
+			#List publishers in tbl_publisher, and have user choose one
+			for i in range(0, numPubs):
+				print(f"{i+1}) {publishers[i]}")
+			print(f"{numPubs+1}) Quit to previous page")
+			pubInp = input(f"\nPlease enter a number between 1 and {numPubs+1}: ")
+			if check.validInput(pubInp, 1, numPubs+1):
+				pubInp = int(pubInp)
+				#If not quitting, remeber publisher Id of selection
+				if pubInp != numPubs + 1:
+					#pubID is going into the database
+					#Grab publisher Id based on user's selection
+					pubId = pubIds[pubInp-1]
+					#Add title and pubLisherID to tbl_book
+					try:
+						#Had to insert here so there is an existing Id for the book
+						mycursor.execute("Insert into tbl_book values (NULL, %s, %s);", (titleInp, pubId))
+						mydb.commit()
+						print("\nBook added to database.")
+					except Exception as e:
+						mydb.rollback()
+						raise e
+				#If quitting
+				else:
+					print("\nMoving to previous page...")
+					return
+ 
+				#Want to assign an author that is already in the database
+				if choice == 1:
+					#Select an exiting author
+					#This will go in tbl_book_authors, with the book_id
+					authors = getTableData('tbl_author')
+					authIds = getIds('tbl_author')
+					numAuths = len(authors)
+					#Listing authors
+					for i in range(0, numAuths):
+						print(f"{i+1}) {authors[i]}")
+					print(f"{numAuths+1}) Quit to previous page")
+					authInp = input(f"\nPlease enter a number between 1 and {numAuths+1}: ")
+					if check.validInput(authInp, 1, numAuths+1):
+						authInp = int(authInp)
+						#If not quitting, remeber publisher Id of selection
+						if authInp != numAuths + 1:
+							#authorId is going to be based on user's selection
+							print(f"authIds(from getIds):{authIds}")
+							authId = authIds[authInp-1]
+							
+						#If quitting
+						else:
+							print("\nMoving to previous page...")
+							return
+				#If choice = 2
+				else:
+					#Ask user for a new author
+					print("\nPlease limit to 45 characters.")
+					#If nameInp is 'quit' then go to previous page
+					nameInp = input("Please enter the name of the new author (type 'quit' to cancel):\n")
+					#If user types quit
+					if nameInp in ('q', 'Q', 'quit', 'Quit', 'QUIT'):
+						print("\nMoving to previous page...")
+						return
+					#Add title and pubLisherID to tbl_book
+					try:
+						#Had to insert here so there is an existing Id for the book
+						mycursor.execute("Insert into tbl_author values (NULL, %s);", (nameInp,))
+						mydb.commit()
+						print("\nAuthor added to the database.")
+					except Exception as e:
+						mydb.rollback()
+						raise e
+					#For tbl_book_authors, get author id of author we just added
+					authIds = getIds('tbl_author')
+					print(f"authIds(from getIds):{authIds}")
+					authId = authIds[-1]
+				#Now we need the book Id, need this for both instances
+				#This is the book id of our newly added book
+				bookIds = getIds('tbl_book')
+				print(f"bookIds(from getIds):{bookIds}")
+				bookId = bookIds[-1]
+				try:
+					#This links our newly added book to an either the new or existing author
+					#**ERROR: RIGHT AUTHOR WRONG BOOK
+					print(f"\nbookId: {bookId}, authId: {authId} are going into tbl_book_authors together.")
+					mycursor.execute("Insert into tbl_book_authors values (%s, %s);", (bookId, authId))
+					mydb.commit()
+				except Exception as e:
+					mydb.rollback()
+					raise e
+			#If input was invalid
+			print("\nMoving to previous page ...")
+		#If quit is selected
+		else:
+			print("\nMoving to previous page ...")
+	
+	#Add a book and author, or just a book
+	#tbl_book:bookID, title, pubId
+	#Select a publisher
+	
+ 
 def updateBookAuthor():
 	print("This will take more logic than the other tables to UPDATE")
 
@@ -242,13 +365,15 @@ def deleteBookAuthor():
 def overrideDueDate():
 	inp = -1
 	numBors = -1 
+	#Unless the user wants to quit
 	while inp != numBors + 1:
 		#Get borrower data from database
 		borrowers = getTableData('tbl_borrower')
 		numBors = len(borrowers)
 		cardNums = getIds('tbl_borrower')
 		print(f"\nPlease select a borrower to override due date of:\n")
-		for i in range(0,numBors):
+		#Display borrowers
+		for i in range(0, numBors):
 			print(f"{i+1}) {borrowers[i]}")
 		print(f"{numBors+1}) To quit to previous menu")
 		inp = input(f"\nPlease enter a number between 1 and {numBors+1}: ")
@@ -261,7 +386,7 @@ def overrideDueDate():
 				#Find borrower's loans in tbl_book_loans
 				loanCount = 0
 				try:
-					mycursor.execute(f"SELECT * FROM tbl_book_loans WHERE cardNo = {cardNum}")
+					mycursor.execute("SELECT * FROM tbl_book_loans WHERE cardNo = %s", (cardNum,))
 					borLoans = mycursor.fetchall()
 					loanCount = len(borLoans)
 				except Exception as e:
@@ -280,7 +405,7 @@ def overrideDueDate():
 						print(f"\nPlease select a loan to override due date of:\n")
 						#Will refresh the due dates after they are changed
 						try:
-							mycursor.execute(f"SELECT * FROM tbl_book_loans WHERE cardNo = {cardNum}")
+							mycursor.execute("SELECT * FROM tbl_book_loans WHERE cardNo = %s", (cardNum,))
 							borLoans = mycursor.fetchall()
 						except Exception as e:
 							raise e
@@ -308,7 +433,7 @@ def overrideDueDate():
 								else:
 									#**Could use a decent date format validation
 									try:
-										mycursor.execute(f"UPDATE tbl_book_loans SET dueDate = '{newDate}' WHERE bookId = {loan[0]} AND branchId = {loan[1]} AND cardNo = {loan[2]};")
+										mycursor.execute("UPDATE tbl_book_loans SET dueDate = %s WHERE bookId = %s AND branchId = %s AND cardNo = %s;", (newDate, loan[0], loan[1], loan[2]))
 										mydb.commit()
 									except Exception as e:
 										mydb.rollback()
