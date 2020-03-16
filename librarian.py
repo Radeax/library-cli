@@ -97,22 +97,29 @@ def changeBranchInfo(branchId, branchName, branchLocation, libraries):
 	print("\nYou wrote:{0}\n".format(nameInput))
 	if nameInput == "quit":
 		return
-	#libraries[branchId][1]=nameInput
-	updateBranchName(branchId,nameInput)
+	elif nameInput== "N/A":
+		pass
+	else:
+		updateBranchName(branchId,nameInput)
+
+	
 	#This will tell us what to update the address to
 	locInput = input("Please enter new branch address or enter N/A for no change:\n")
 	print("\nYou wrote:{0}\n".format(locInput))
 	if locInput == "quit":
 		return
-
+	elif locInput== "N/A":
+		pass
+	else:
+		updateBranchLocation(branchId,locInput)
 	#libraries[branchId][2]=locInput#updates instance of table
-	updateBranchLocation(branchId,locInput)
+	
 	
 #Option 2, Update number of books there are
 def updateBookCount(branchId, branchName, branchLocation,table):
 	MAX_BOOKS = 10000
-	availableBooks= getAvailBooks(branchId)
-	listOfCopies= getTableData("tbl_book_copies")
+	#availableBooks= getAvailBooks(branchId)
+	listOfCopies= getAvailBooks2(branchId)
 	#listOfcopies= method(bookcpies)
 
 	print("\nChange number of copies of books at:", branchName)
@@ -121,12 +128,12 @@ def updateBookCount(branchId, branchName, branchLocation,table):
 	
 	
 	bookInp = 0
-	numBooks = len(availableBooks)
+	numBooks = len(listOfCopies)
 	print("\nPick the Book you want to add copies of, to your branch:\n")
 	
-	for i in range(0,len(availableBooks)):
-		
-		print("{0}) {1} {2}".format(availableBooks[i][0], getBookTitle(availableBooks[i][0]), availableBooks[i][2]))
+	for i in range(0,len(listOfCopies)):
+		#,availableBooks[i][0]
+		print("{0}) {1} {2}".format(i+1, getBookTitle(listOfCopies[i][0]), listOfCopies[i][2]))
 		#print("{0}) {1} by {2}".format(i, listOfCopies[i][1], listOfCopies[i][2]))
 	print("{0}) Quit to previous page\n".format(numBooks + 1))
 
@@ -135,8 +142,8 @@ def updateBookCount(branchId, branchName, branchLocation,table):
 	if check.validInput(bookInp, 1, numBooks + 1):
 		bookInp = int(bookInp)
 		if bookInp != (numBooks + 1):
-			print("\nYou picked {0} {1}".format(availableBooks[bookInp-1][0],getBookTitle(availableBooks[bookInp-1][0])))
-			print("\nExisting number of copies: {0}".format(availableBooks[bookInp-1][2]))
+			print("\nYou picked {0} {1}".format(listOfCopies[bookInp-1][0],getBookTitle(listOfCopies[bookInp-1][0])))
+			print("\nExisting number of copies: {0}".format(listOfCopies[bookInp-1][2]))
 			#Enter new amount of copies
 			newBookCount = input("Enter new number of copies: ")
 			if  check.validInput(newBookCount, 0, MAX_BOOKS):
