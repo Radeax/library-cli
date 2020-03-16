@@ -12,8 +12,6 @@ branches = getAllBranches()
 def runBorrower():
     cardNum = -1
     print("\nYour input was 3, You are a Borrower\n")
-    print(borrowers)
-    print(borrowerIds)
 
     # Get card number
     while cardNum not in borrowerIds:
@@ -141,10 +139,8 @@ def selectLibBook(branchId, cardNum):
 
 def selectBorBook(branchId, cardNum):  # Option 2, Return a book
     loans = getBorrowedBooks(branchId, cardNum)
-    print(getBorrowedBooks(branchId, cardNum))
 
     numLoans = len(loans)
-    print("NumLoans =", numLoans)
     bookInp = 0
 
     if numLoans == 0:
@@ -174,9 +170,10 @@ def selectBorBook(branchId, cardNum):  # Option 2, Return a book
                 # If quit not selected
                 if bookInp != (numLoans + 1):
                     myBook = loans[bookInp - 1]
-                    print(f"\nYou picked {myBook[1]} with id: {myBook[0]}")
+                    myBookTitle = getBookTitle(myBook[0])
+                    print(f"\nYou picked {myBookTitle}")
                     print(
-                        f"\nYou are returning 1 copy of {myBook[1]} to {getBranchName(branchId)}.")
+                        f"\nYou are returning 1 copy of {myBookTitle} to {getBranchName(branchId)}.")
                     myBookID = myBook[0]
                     processReturn(myBookID, branchId, cardNum)
                 else:
