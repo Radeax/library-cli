@@ -9,7 +9,6 @@ from librarysql import *
 
 
 def main():
-    # initialData()
     print("\nWelcome to the GCIT Library Management System.")
     inp = 0
     # Main menu loop
