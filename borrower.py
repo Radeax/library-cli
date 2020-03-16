@@ -4,12 +4,12 @@ from librarysql import *
 
 # initialData()  # Only run on a library database with no data
 borrower = []
-borrowerIds = getIds("tbl_borrower")
-borrowers = getTableData("tbl_borrower")
-branches = getAllBranches()
 
 
 def runBorrower():
+    borrowerIds = getIds("tbl_borrower")
+    borrowers = getTableData("tbl_borrower")
+    branches = getAllBranches()
     cardNum = -1
     print("\nYour input was 3, You are a Borrower\n")
 
@@ -50,6 +50,7 @@ def bookOption(cardNum):
 
 
 def selectBranch(cardNum, checkout):
+    branches = getAllBranches()
     # numBranches + 1 will be our quit option
     numBranches = len(branches)
     branchID = 0
@@ -86,6 +87,7 @@ def selectBranch(cardNum, checkout):
 
 
 def selectLibBook(branchId, cardNum):
+    branches = getAllBranches()
     branchName = branches[branchId-1][1]
     branchLoc = branches[branchId-1][2]
 
