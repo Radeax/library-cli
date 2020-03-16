@@ -537,15 +537,12 @@ def overrideDueDate():
 							#Grab specific row based on selection
 							loanInp = int(loanInp)
 							if loanInp != loanCount + 1:
-								print(f"borLoans:{borLoans}")
 								loan = borLoans[loanInp-1]
 								#Show user current due date
 								#**Maybe clean up how the date is displayed
 								print(f"\nThis borrower has a due date of: {loan[4]}")
 								#User inputs date or quits
 								newDate = input("Please input new date (yyyy-mm-dd), enter 'quit' if no change:\n")
-								print(f"\nnewDate:{newDate}\n")
-								print(f"\nloan:{loan}\n")
 								
 								if newDate in ('quit', 'QUIT', 'Quit', 'Q', 'q'):
 									print("\nMoving to previous menu ...")
