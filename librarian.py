@@ -4,7 +4,6 @@ from librarysql import *
 
 
 def runLibrarian():
-
     # This input will be for the Librarian menu
     print("\nYour input was 1, You are a Librarian\n")
     inp = 0
@@ -25,15 +24,14 @@ def runLibrarian():
 
 
 def selectBranch():
-
-    libraries = getTableData("tbl_library_branch")
-
-    # numBranches + 1 will be our quit option
-    numBranches = len(libraries)
     # This input will be for the library selection
     libInp = 0
+    numBranches = 0
     # Lib 2, Select library branch
     while libInp != (numBranches + 1):
+        libraries = getTableData("tbl_library_branch")
+        # numBranches + 1 will be our quit option
+        numBranches = len(libraries)
         print("\nWhich branch do you manage?\n")
         # Print out options
         for i in range(0, len(libraries)):
@@ -101,10 +99,9 @@ def changeBranchInfo(branchId, branchName, branchLocation, libraries):
     # This will tell us what to update the name to
     nameInput = input(
         "Please enter new branch name or enter N/A for no change:\n")
-    print("\nYou wrote:{0}\n".format(nameInput))
-    if nameInput == "quit":
+    if nameInput in ("quit", "Quit", "QUIT", "q", "Q"):
         return
-    elif nameInput == "N/A":
+    elif nameInput in ("N/A", "na", "n/a", "NA"):
         pass
     else:
         updateBranchName(branchId, nameInput)
@@ -112,10 +109,9 @@ def changeBranchInfo(branchId, branchName, branchLocation, libraries):
     # This will tell us what to update the address to
     locInput = input(
         "Please enter new branch address or enter N/A for no change:\n")
-    print("\nYou wrote:{0}\n".format(locInput))
-    if locInput == "quit":
+    if locInput in ("quit", "Quit", "QUIT", "q", "Q"):
         return
-    elif locInput == "N/A":
+    elif locInput in ("N/A", "na", "n/a", "NA"):
         pass
     else:
         updateBranchLocation(branchId, locInput)
