@@ -19,8 +19,8 @@ def getTableData(tableName):
         result = cursor.fetchall()
         connection.commit()
         return [list(item) for item in result]
-    except Error as e:
-        print(e)
+    except Exception as e:
+        raise e
     finally:
         connection.close()
         cursor.close()
@@ -47,8 +47,8 @@ def getIds(tableName):
         result = cursor.fetchall()
         connection.commit()
         return [item[0] for item in result]
-    except Error as e:
-        print(e)
+    except Exception as e:
+        raise e
     finally:
         connection.close()
         cursor.close()
